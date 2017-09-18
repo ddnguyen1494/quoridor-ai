@@ -1,0 +1,206 @@
+Quoridor Version 1.0 Manual
+There are several important things to note before making any changes to the program.
+Make sure to read the description of all classes and structs.
+
+player is a class used to represent a playing piece.
+Variables
+int x- how far to the right the piece is from the left side of the board
+
+int y- how far down the piece is from the top side of the board
+	Note that both x and y have to be positive and even values to keep the piece
+	properly aligned in the grid.
+int goalX- if the piece reaches this x position, the player wins
+
+int goalY- if the piece reaches this y position, the player wins
+	Only values of 0 and 16 are valid for goalX and goalY. One of these values should be set
+	and the other should be set to -1 so the game will know not to check for that component.
+	The allowed combinations are (-1, 16), (-1, 0), (16, -1), and (0, -1).
+
+int wallsLeft- the player can only place a wall if this value is 1 or above
+
+int id- 0 for player 1, 1 for player 2, 2 for player 3, and 3 for player 4
+
+char textChar- what character the piece is printed as, is a, b, c, or d depending on id.
+
+
+Methods
+player()- creates a player starting at position (0, 0)
+
+player(sx, sy)- creates a player starting at position (sx, sy)
+
+bool checkWin()- if x == goalX or y == goalY, returns true
+
+position is struct consisting of 2 integers, one for x and one for y.
+
+board is a class that holds the game's state. Use the most caution when editing this class.
+Variables
+const int width = 17- the width of the game board
+
+const int height = 17- the height of the game board
+
+char[17][17] collisions- holds the positions of all players and walls, a ' ' means no collision,
+'a', 'b', 'c', and 'd' are players, 'H', and 'V' are horizontal and vertical walls.
+
+int accessible[17][17]- holds the minimum amount of moves to go from a starting square to all other
+squares, inaccessible squares are marked with 1,000. This is used to see if the game can become
+unwinnable if a wall is placed.
+	The official rules describe a 9x9 grid with grooves in the middle. There are 8 grooves resulting in
+	a length of 17 so walls and players can be stored in the same 2d array. A player's position must be
+	(even, even) to account for this. A wall must start and end with (even, odd) for horizontal walls
+	or (odd, even) for vertical walls.
+
+	 | | |1|a|0| | |
+	-+-+-+-+-+-+-+-+-
+	 | | | |2| | | |
+	-+-+-+-+-+-+-+-+-
+	 | | | | | | | |
+	-+-+-+-+-+-+-+-+-
+	 | | | | | | | |
+	-+-+-+-+-+-+-+-+-
+	 | | | | | | | |
+	-+-+-+-+-+-+-+-+-
+	 | | | | | | | |
+	-+-+-+-+-+-+-+-+-
+	 | | | | | | | |
+	-+-+-+-+-+-+-+-+-
+	 | | | | | | | |
+	-+-+-+-+-+-+-+-+-
+	 | | | |b| | | |
+	In this diagram, the '2' is at position (8, 2), all empty cells are (even, even) and
+	the bottom right vertical groove is at position (15, 16).
+
+int numPlayers- the amount of players in the game, should be 2, 3, or 4. This
+variable is often used as a loop condition.
+
+player playerList[4]- holds each player on the board, only items 0 - numPlayers - 1 are valid.
+
+position validMoves[12]- holds the coordinates of all valid moves with (-1, -1) meaning there
+is no valid move.
+	Up to 8 moves can be valid at a time. Before compacting, the moves are in these positions.
+	 | | | | | | | |
+	-+-+-+-+-+-+-+-+-
+	 | | | |5| | | |
+	-+-+-+-+-+-+-+-+-
+	 | | |A|1|9| | |
+	-+-+-+-+-+-+-+-+-
+	 | |6|2|P|0|4| |
+	-+-+-+-+-+-+-+-+-
+	 | | |B|3|8| | |
+	-+-+-+-+-+-+-+-+-
+	 | | | |7| | | |
+	-+-+-+-+-+-+-+-+-
+	 | | | | | | | |
+	-+-+-+-+-+-+-+-+-
+	 | | | | | | | |
+	-+-+-+-+-+-+-+-+-
+	 | | | | | | | | 
+
+int currentPlayer- indicates whose turn it is, ranges from 0 to numPlayers - 1.
+It is currentPlayer + 1's turn and playerList[currentPlayer] is affected by any actions taken.
+
+int winner- indicates which player has won, or -1 if the game is not yet won, used as a looping
+condtion to keep the game going in main().
+
+
+Methods
+	Note: Any states that do not alter the state of the board are marked with !. When
+	editing the marked methods, make sure the sate of the board remains unchanged
+	during the execution.
+board()- all values is collisions are set to ' ', no players are added.
+
+void addPlayer(int x, int y)- Adds a player object at the given position. The player's id is set
+to numPlayers, textChar to 'a', 'b', 'c', or 'd', and (goalX, goalY) to (-1, 16), (-1, 0),
+(16, -1), or (0, -1).
+	Note: There is a known issue where it will only allow up to 3 players instead of 4. This
+	will be fixed in version 1.1.
+void startGame()- gives each player 20/numPlayers walls, 10 walls each for 2 players,
+6 walls each for 3 players, and 5 walls each for 4 players.
+
+void placeWallH(int x, int y)- places a horizontal wall with its left side at position (x, y)
+	Note: This sets collisions[x][y], collisions[x+1][y], and collisions[x+2][y] to 'H'.
+	This does not do bounds checking and as a precondition, x has to be even, and y has
+	to be odd so it is in a horizontal groove and blocks exactly 2 grid squares. Always
+	see if canPlaceWallH is true before doing this.
+
+void placeWallV(int x, int y)- places a vertical wall with its top side at position (x, y)
+	Note: This sets collisions[x][y], collisions[x][y+1], and collisions[x][y+2] to 'V'.
+	This does not do bounds checking and as a precondition, x has to be odd, and y has
+	to be even so it is in a vertical groove and blocks exactly 2 grid squares. Always
+	see if canPlaceWallV is true before doing this.
+
+! bool canPlaceWallH(int x, int y)- checks if y is between 1 and height inclusive and is odd,
+x is between 0 and width - 2 inclusive and is even, and collisions[x][y], collisions[x+1][y]
+, and collisions[x+2][y] are all ' ', returns true if all conditions are true, or false otherwise.
+
+! bool checkWinnable(int id)- returns if it is possible for playerList[id] to reach goalX or goalY,
+used to make sure a wall placement does not render the game unwinnable for a player.
+	Note: This does not alter the board, but does affect accessible.
+
+! bool canPlaceWallV(int x, int y)- checks if x is between 1 and width inclusive and is odd,
+y is between 0 and height - 2 inclusive and is even, and collisions[x][y], collisions[x][y+1]
+, and collisions[x][y+2] are all ' ', returns true if all conditions are true, or false otherwise.
+
+
+void movePlayer(int id, int nx, int ny)- moves playerList[id] to (nx, ny). The player's old
+position in collisions is filled with ' ' and new position filled with textChar.
+
+! bool inBounds(int x, int y)- returns true if 0 <= x < width and 0 <= y < height, false otherwise.
+
+! bool canMoveRight(int x, int y)- returns true if (x + 2, y) is in bounds and there is
+no wall at (x + 1, y), false otherwise.
+
+
+! bool canMoveUp(int x, int y)- returns true if (x, y - 2) is in bounds and there is
+no wall at (x, y - 1), false otherwise.
+
+
+! bool canMoveLeft(int x, int y)- returns true if (x - 2, y) is in bounds and there is
+no wall at (x - 1, y), false otherwise.
+
+
+! bool canMoveDown(int x, int y)- returns true if (x, y + 2) is in bounds and there is
+no wall at (x, y + 1), false otherwise.
+
+! void getAccessible(int x, int y, int num)- a recursive method, does nothing
+if accessible[x][y] > num, otherwise accessible[x][y] = num and getAccessible
+is called on each adjacent square not blocked by a wall with num + 1.
+	Note: This does not alter the board, but does affect accessible.
+
+! void getAccessible(int x, int y)- sets all values in accessible to 1000 and
+calls getAccessible(x, y, 0)
+	Note: This does not alter the board, but does affect accessible.
+
+! void getMoves(int id)- sets validMoves to all moves valid for the player to
+make and compacts the array so any values of (-1, -1) are at the end.
+	Note: This does not alter the board, but does affect validMoves.
+
+! void compactMoves()- moves all in bound positions to the front of validMoves
+in the same order the were generated, out of bound values are left at the end.
+	Note: This does not alter the board, but does affect validMoves.
+
+void playerTurn()- does different things depending on keyboard input.
+0-9- moves the piece to the square marked with that number, corresponds to
+validMoves[input].
+h- asks for the left position of a horizontal wall, checks if it is valid and does not
+make the game unwinnable for someone. If it is ok, it places the wall and decrements the
+walls remaining.
+v- asks for the top position of a vertical wall, checks if it is valid and does not
+make the game unwinnable for someone. If it is ok, it places the wall and decrements the
+walls remaining.
+x- passes the turn, doing nothing
+Once the approriate action is done, it sets winner to currentPlayer if the player reached their
+goal, and increments currentPlayer. If this change makes currentPlayer reach numPlayers,
+currentPlayer is instead set to 0.
+
+! string movesString()- generates a list of the positions in validMoves that are in bounds as a string.
+
+! string ToString()- generates a string representation of collisions, empty vertcal grooves
+shown as '|', empty horizontal grooves shown as '-', and intersections as '+'. Non grooves
+spaces and walls are shown with the character in collisions.
+	Note: The move numbers and gridlines are spaces in collisions in spite of the printed
+	output at the start of each turn.
+
+
+
+Version History
+1.0: 9/17/2017- Inital code created by David Brown
