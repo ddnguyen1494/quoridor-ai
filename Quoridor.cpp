@@ -1,10 +1,21 @@
 // Quoridor.cpp : Defines the entry point for the console application.
 // A console based implementation of Quoridor designed by David Brown
+//Version 1.1 9/19/2017
+
 #include "stdafx.h"
 #include <iostream>
 #include <cstdlib>
 #include <string>
 using namespace std;
+
+//consists of integer x and y coordinate
+struct position
+{
+	int x;
+	int y;
+};
+
+//represents a player's piece
 class player
 {
 public:
@@ -15,29 +26,30 @@ public:
 	int wallsLeft;
 	int id;
 	char textChar;
+
+	//creates a player starting at (0, 0)
 	player()
 	{
 		x = 0;
 		y = 0;
 	}
 
+	//creates a player starting at the given position
 	player(int sx, int sy)
 	{
 		x = sx;
 		y = sy;
 	}
 
+	//returns true if the player has reached goalX or goalY
 	bool checkWin()
 	{
 		return (x == goalX || y == goalY);
 	}
 
 };
-struct position
-{
-	int x;
-	int y;
-};
+
+//stores the state of the game
 class board
 {
 public:
@@ -50,7 +62,9 @@ public:
 	position validMoves[12];
 	int currentPlayer = 0;
 	int winner = -1;
-	board()
+
+	//Creates the board with the given number of players and no walls
+	board(int pNum)
 	{
 		for (int j = 0; j < height; j++)
 		{
@@ -59,47 +73,34 @@ public:
 				collisions[i][j] = ' ';
 			}
 		}
-	}
-	void addPlayer(int x, int y)
-	{
-		if (numPlayers <= 2)
+		for (int k = 0; k < pNum; k++)
 		{
-			player p(x, y);
+			addPlayer();
+		}
+		startGame();
+	}
+	
+	//adds a player if there are 3 or fewer players
+	void addPlayer()
+	{
+		if (numPlayers <= 3)
+		{
+			int stX[4] = { 8, 8, 0, 16 };
+			int stY[4] = { 0, 16, 8, 8 };
+			int gX[4] = { -1, -1, 16, 0 };
+			int gY[4] = { 16, 0, -1, -1 };
+			player p(stX[numPlayers], stY[numPlayers]);
+			p.goalX = gX[numPlayers];
+			p.goalY = gY[numPlayers];
 			p.id = numPlayers;
 			p.textChar = (char)('a' + p.id);
-			playerList[p.id] = p;
+			playerList[numPlayers] = p;
 			numPlayers++;
-			collisions[x][y] = p.textChar;
-		}
-		if (numPlayers == 1)
-		{
-			playerList[0].x = 8;
-			playerList[0].y = 0;
-			playerList[0].goalX = -1;
-			playerList[0].goalY = 16;
-		}
-		else if (numPlayers == 2)
-		{
-			playerList[1].x = 8;
-			playerList[1].y = 16;
-			playerList[1].goalX = -1;
-			playerList[1].goalY = 0;
-		}
-		else if (numPlayers == 3)
-		{
-			playerList[2].x = 0;
-			playerList[2].y = 8;
-			playerList[2].goalX = 16;
-			playerList[2].goalY = -1;
-		}
-		else
-		{
-			playerList[3].x = 16;
-			playerList[3].y = 8;
-			playerList[3].goalX = 0;
-			playerList[3].goalY = -1;
+			collisions[p.x][p.y] = p.textChar;
 		}
 	}
+
+	//gives all players an equal amount of walls
 	void startGame()
 	{
 		int wallAmount = 20 / numPlayers;
@@ -108,6 +109,7 @@ public:
 			playerList[i].wallsLeft = wallAmount;
 		}
 	}
+
 	//places a horizontal wall of length 3 with its left position at (x,y), call canPlaceWallH before using this
 	void placeWallH(int x, int y)
 	{
@@ -115,6 +117,7 @@ public:
 		collisions[x + 1][y] = 'H';
 		collisions[x + 2][y] = 'H';
 	}
+
 	//places a vertical wall of length 3 with its top position at (x,y), call canPlaceWallV before using this
 	void placeWallV(int x, int y)
 	{
@@ -122,6 +125,7 @@ public:
 		collisions[x][y + 1] = 'V';
 		collisions[x][y + 2] = 'V';
 	}
+
 	//returns whether it is possible to place a horizontal wall with its left at position (x,y) and its length 3
 	bool canPlaceWallH(int x, int y)
 	{
@@ -140,6 +144,7 @@ public:
 		return true;
 	}
 
+	//returns whether playerList[id] can reach the goal row or column
 	bool checkWinnable(int id)
 	{
 		getAccessible(playerList[id].x, playerList[id].y);
@@ -189,6 +194,8 @@ public:
 		}
 		return true;
 	}
+
+	//Moves playerList[id] to (nx, ny), changing their old position in collisions to ' '
 	void movePlayer(int id, int nx, int ny)
 	{
 		collisions[playerList[id].x][playerList[id].y] = ' ';
@@ -196,11 +203,14 @@ public:
 		playerList[id].y = ny;
 		collisions[playerList[id].x][playerList[id].y] = playerList[id].textChar;
 	}
+
 	//returns true if (x,y) is in bounds and false if it is out of bounds
 	bool inBounds(int x, int y)
 	{
 		return (x >= 0 && x < width && y >= 0 && y < height);
 	}
+
+	//returns true if from (x, y), it is possible to move to the adjacent square to the right
 	bool canMoveRight(int x, int y)
 	{
 		if (x % 2 == 0 && y % 2 == 0)
@@ -212,6 +222,8 @@ public:
 		}
 		return false;
 	}
+
+	//returns true if from (x, y), it is possible to move to the adjacent square above it
 	bool canMoveUp(int x, int y)
 	{
 		if (x % 2 == 0 && y % 2 == 0)
@@ -223,6 +235,8 @@ public:
 		}
 		return false;
 	}
+
+	//returns true if from (x, y), it is possible to move to the adjacent square to the left
 	bool canMoveLeft(int x, int y)
 	{
 		if (x % 2 == 0 && y % 2 == 0)
@@ -234,6 +248,8 @@ public:
 		}
 		return false;
 	}
+
+	//returns true if from (x, y), it is possible to move to the adjacent square below it
 	bool canMoveDown(int x, int y)
 	{
 		if (x % 2 == 0 && y % 2 == 0)
@@ -246,30 +262,33 @@ public:
 		return false;
 	}
 
-	void getAccessible(int x, int y, int num)
+	//sets accessible[x][y] to num and adjacent accessible squares to num + 1, does not go backwards
+	void getAccessible(int x, int y, int num, int direction)
 	{
 		if (accessible[x][y] > num)
 		{
 			accessible[x][y] = num;
-			if (canMoveRight(x, y))
+			if (direction != 2 && canMoveRight(x, y))
 			{
-				getAccessible(x + 2, y, num + 1);
+				getAccessible(x + 2, y, num + 1, 0);
 			}
-			if (canMoveUp(x, y))
+			if (direction != 3 && canMoveUp(x, y))
 			{
-				getAccessible(x, y - 2, num + 1);
+				getAccessible(x, y - 2, num + 1, 1);
 			}
-			if (canMoveLeft(x, y))
+			if (direction != 0 && canMoveLeft(x, y))
 			{
-				getAccessible(x - 2, y, num + 1);
+				getAccessible(x - 2, y, num + 1, 2);
 			}
-			if (canMoveDown(x, y))
+			if (direction != 1 && canMoveDown(x, y))
 			{
-				getAccessible(x, y + 2, num + 1);
+				getAccessible(x, y + 2, num + 1, 3);
 			}
 		}
 	}
 
+	//sets accessible to the shortest distance from (x, y) to all other squares,
+	//inaccessible squares are marked with 1000 and the method does not pass through walls
 	void getAccessible(int x, int y)
 	{
 		for (int i = 0; i < 17; i++)
@@ -279,7 +298,7 @@ public:
 				accessible[i][j] = 1000;
 			}
 		}
-		getAccessible(x, y, 0);
+		getAccessible(x, y, 0, -1);
 	}
 
 	//sets the validMoves list to all moves that are valid to make for the given player
@@ -393,14 +412,14 @@ public:
 				validMoves[2].y = -1;
 				if (!canMoveLeft(p.x - 2, p.y))
 				{
-					validMoves[4].x = -1;
-					validMoves[4].y = -1;
-					if (canMoveDown(p.x + 2, p.y))
+					validMoves[6].x = -1;
+					validMoves[6].y = -1;
+					if (canMoveDown(p.x - 2, p.y))
 					{
 						validMoves[11].x = p.x - 2; //move 12: 1 square left, 1 square down
 						validMoves[11].y = p.y + 2;
 					}
-					if (canMoveUp(p.x + 2, p.y))
+					if (canMoveUp(p.x - 2, p.y))
 					{
 						validMoves[10].x = p.x - 2; //move 11: 1 square left, 1 square up
 						validMoves[10].y = p.y - 2;
@@ -424,12 +443,12 @@ public:
 			}
 			else
 			{
-				validMoves[0].x = -1;
-				validMoves[0].y = -1;
-				if (!canMoveDown(p.x, p.y - 2))
+				validMoves[3].x = -1;
+				validMoves[3].y = -1;
+				if (!canMoveDown(p.x, p.y + 2))
 				{
-					validMoves[5].x = -1;
-					validMoves[5].y = -1;
+					validMoves[7].x = -1;
+					validMoves[7].y = -1;
 					if (canMoveRight(p.x, p.y + 2))
 					{
 						validMoves[8].x = p.x + 2; //move 9: 1 square right, 1 square down
@@ -453,6 +472,7 @@ public:
 		compactMoves();
 	}
 
+	//shifts all in bounds moves in validMoves as far left as possible, leaving out of bound values at the right
 	void compactMoves()
 	{
 		int max = 0;
@@ -473,11 +493,14 @@ public:
 		}
 	}
 
+	//uses keyboard input to let a human player take a turn
+	//0-9 moves the piece to the labeled square,
+	//x passes, and h and v place horizontal and vertical walls
 	void playerTurn()
 	{
 		char inputChar = 'p';
 		getMoves(currentPlayer);
-		cout << ToString() << '\n';
+		cout << ToString();
 		for (int i = 0; i < 12; i++)
 		{
 			if (inBounds(validMoves[i].x, validMoves[i].y))
@@ -489,19 +512,38 @@ public:
 				break;
 			}
 		}
-		cout << "It is player " << currentPlayer + 1 << "'s turn.\n";
-		cout << "To move, type the number of an avaliable move.\n";
-		cout << "To pass, press x.\n";
+		
+		string message = "It is player " + to_string(currentPlayer + 1) + "'s turn.\nTo move, type the number of an avaliable move.\nTo pass, press x.\n";
 		if (playerList[currentPlayer].wallsLeft > 0)
 		{
-			cout << "You have " << playerList[currentPlayer].wallsLeft << " walls left.\n";
-			cout << "To place a horizontal wall, press h. To place a vertical wall, press v.\n";
+			message += "You have " + to_string(playerList[currentPlayer].wallsLeft) + " walls left.\nTo place a horizontal wall, press h. To place a vertical wall, press v.\n";
 		}
 		while ((inputChar > '9' || inputChar < '0') && (inputChar != 'h' && inputChar != 'v' && inputChar != 'x'))
 		{
+			cout << message;
 			cin >> inputChar;
-			if (inputChar > '9' || inputChar < '0')
+			if (inputChar >= '0' && inputChar <= '9')
 			{
+				int moveNum = (int)(inputChar - '0');
+				if (moveNum >= 0 && moveNum <= 11 && inBounds(validMoves[moveNum].x, validMoves[moveNum].y))
+				{
+					movePlayer(currentPlayer, validMoves[moveNum].x, validMoves[moveNum].y);
+					if (playerList[currentPlayer].checkWin())
+					{
+						winner = currentPlayer;
+					}
+				}
+				else
+				{
+					inputChar = 'p';
+				}
+			}
+			else
+			{
+				if (inputChar == 'x')
+				{
+					break;
+				}
 				if (playerList[currentPlayer].wallsLeft == 0)
 				{
 					cout << "You are out of walls. Your only choice is to move.\n";
@@ -563,7 +605,6 @@ public:
 						for (int i = 0; i < numPlayers; i++)
 						{
 							winnable = checkWinnable(i);
-							//cout << winnable << '\n';
 							if (!winnable)
 							{
 								valid = false;
@@ -586,23 +627,9 @@ public:
 				}
 
 			}
-			else
-			{
-				int moveNum = (int)(inputChar - '0');
-				if (moveNum >= 0 && moveNum <= 11 && inBounds(validMoves[moveNum].x, validMoves[moveNum].y))
-				{
-					movePlayer(currentPlayer, validMoves[moveNum].x, validMoves[moveNum].y);
-				}
-				else
-				{
-					inputChar = 'p';
-				}
-			}
+
 		}
-		if (playerList[currentPlayer].checkWin())
-		{
-			winner = currentPlayer;
-		}
+
 		currentPlayer++;
 		if (currentPlayer >= numPlayers)
 		{
@@ -611,6 +638,7 @@ public:
 		cout << '\n';
 	}
 
+	//Returns a string representation of validMoves with each (x,y) coordinate on a new line
 	string movesString()
 	{
 		string result = "Avaliable Moves for player " + to_string(currentPlayer + 1) + ":\n";
@@ -623,33 +651,51 @@ public:
 				result += ", " + to_string(validMoves[i].y);
 				result += ")\n";
 			}
+			else
+			{
+				break;
+			}
 		}
 		return result;
 	}
+
+	//Returns a string representation of collisions, gridlines are shown when there is no wall
+	//and x or y is odd and the whole grid is bordered with = and ||.
 	string ToString()
 	{
-		string result = "";
+		string result = "//=================\\\\\n";
+		int xMod = 0;
+		int yMod = 0;
 		for (int j = 0; j < height; j++)
 		{
+			result += "||";
 			for (int i = 0; i < width; i++)
 			{
+				xMod = i % 2;
+				yMod = j % 2;
 				if (collisions[i][j] == ' ')
 				{
-					if (i % 2 == 0 && j % 2 == 1)
+					if (xMod == 0)
 					{
-						result += '-';
-					}
-					else if (i % 2 == 1 && j % 2 == 0)
-					{
-						result += '|';
-					}
-					else if (i % 2 == 1 && j % 2 == 1)
-					{
-						result += '+';
+						if (yMod == 1)
+						{
+							result += '-';
+						}
+						else
+						{
+							result += ' ';
+						}
 					}
 					else
 					{
-						result += ' ';
+						if (yMod == 0)
+						{
+							result += '|';
+						}
+						else
+						{
+							result += '+';
+						}
 					}
 				}
 				else
@@ -657,28 +703,36 @@ public:
 					result += collisions[i][j];
 				}
 			}
-			result += '\n';
+			result += "||\n";
 		}
-
+		result += "\\\\=================//\n";
 		return result;
 	}
 
 };
 
-int main()
+int main(int argc, char *argv[])
 {
-	board b;
-	b.addPlayer(8, 0);
-	b.addPlayer(8, 16);
-	b.startGame();
-	//cout << b.ToString() << '\n';
-	while (b.winner == -1)
+	int players = -1;
+	if (argc == 1) //player count not provided on the command line, assume 2 players
+	{
+		players = 2;
+	}
+	else if (strlen(argv[1]) == 1 && argv[1][0] >= '2' && argv[1][0] <= '4')
+	{
+		players = (int)(argv[0][0] - '0');
+	}
+	if (players < 2 || players > 4)
+	{
+		cout << "Quoridor is for 2 to 4 players. The program can only be run if the provided number of players is in range.\n";
+		return -1;
+	}
+	board b(players);
+	while (b.winner == -1) //loop until the game is won
 	{
 		b.playerTurn();
 	}
-	//b.getMoves(0);
-	//cout << b.movesString();
-	//b.movePlayer(0, 8, 2);
+	cout << b.ToString();
 	cout << "Player "<< 1 + b.winner << " won.\nPress enter to finish.";
 	cin.get();
 	cin.get();
