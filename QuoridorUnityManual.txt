@@ -1,0 +1,10 @@
+Build executable is in folder
+How to play:
+Left-Click on square you wish to move to
+To place a Horizontal wall, Left-click on green peg where you wish to place it
+To place a Vertical wall, Right-click on a green peg where you wish to place it
+At any point you may click the ESC-key to quit the application
+
+Future plans:
+Will later update UI to be more appealing.
+Will later implement AI to play against a player.
