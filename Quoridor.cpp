@@ -1,6 +1,6 @@
 // Quoridor.cpp : Defines the entry point for the console application.
 // A console based implementation of Quoridor designed by David Brown
-//Version 1.1 9/19/2017
+//Version 1.2 10/4/2017
 
 #include "stdafx.h"
 #include <iostream>
@@ -78,6 +78,114 @@ public:
 			addPlayer();
 		}
 		startGame();
+	}
+
+	//Translates from a string outputted from stateString() into the board's state
+	board(string state)
+	{
+		for (int j = 0; j < height; j++)
+		{
+			for (int i = 0; i < width; i++)
+			{
+				collisions[i][j] = ' ';
+			}
+		}
+		int start = 0;
+		int value = 0;
+		int comma = 0;
+		while (state[comma] != ',')
+		{
+			comma++;
+		}
+		while (start < comma)
+		{
+			value *= 10;
+			value += (int)(state[start] - '0');
+			start++;
+		}
+		numPlayers = value;
+		start++;
+		comma++;
+		while (state[comma] != ',')
+		{
+			comma++;
+		}
+		value = 0;
+		while (start < comma)
+		{
+			value *= 10;
+			value += (int)(state[start] - '0');
+			start++;
+		}
+		currentPlayer = value;
+		start++;
+		comma++;
+		for (int j = 1; j <= 15; j+=2)
+		{
+			for (int i = 1; i <= 15; i+=2)
+			{
+				if (state[start] == 'H')
+				{
+					placeWallH(i - 1, j);
+				}
+				else if (state[start] == 'V')
+				{
+					placeWallV(i, j - 1);
+				}
+				start += 2;
+			}
+		}
+		comma = start;
+		int wall = 0;
+		int x = 0;
+		int y = 0;
+		for (int k = 0; k < numPlayers; k++)
+		{
+			wall = 0;
+			x = 0;
+			y = 0;
+			while (state[comma] != ',')
+			{
+				comma++;
+			}
+			while (start < comma)
+			{
+				wall *= 10;
+				wall += (int)(state[start] - '0');
+				start++;
+			}
+			start++;
+			comma = start;
+			while (state[comma] != ',')
+			{
+				comma++;
+			}
+			while (start < comma)
+			{
+				x *= 10;
+				x += (int)(state[start] - '0');
+				start++;
+			}
+			start++;
+			comma = start;
+			while (state[comma] != ',')
+			{
+				comma++;
+			}
+			while (start < comma)
+			{
+				y *= 10;
+				y += (int)(state[start] - '0');
+				start++;
+			}
+			start++;
+			comma = start;
+			playerList[k] = player(x, y);
+			playerList[k].wallsLeft = wall;
+			playerList[k].textChar = (char)('a' + k);
+			collisions[x][y] = playerList[k].textChar;
+		}
+
 	}
 	
 	//adds a player if there are 3 or fewer players
@@ -709,8 +817,32 @@ public:
 		return result;
 	}
 
+	//Returns the most compact string representing the board's state
+	string stateString()
+	{
+		string result = "";
+		result += to_string(numPlayers) +",";
+		result += to_string(currentPlayer) + ",";
+		for (int j = 1; j <= 15; j += 2)
+		{
+			for (int i = 1; i <= 15; i += 2)
+			{
+				result += collisions[i][j];
+				result += ",";
+			}
+		}
+		for (int k = 0; k < numPlayers; k++)
+		{
+			result += to_string(playerList[k].wallsLeft) + ",";
+			result += to_string(playerList[k].x) + ",";
+			result += to_string(playerList[k].y) + ",";
+		}
+		return result;
+	}
+
 };
 
+//runs the main loop of the game
 int main(int argc, char *argv[])
 {
 	int players = -1;
@@ -730,6 +862,7 @@ int main(int argc, char *argv[])
 	board b(players);
 	while (b.winner == -1) //loop until the game is won
 	{
+		cout << b.stateString() << '\n';
 		b.playerTurn();
 	}
 	cout << b.ToString();
