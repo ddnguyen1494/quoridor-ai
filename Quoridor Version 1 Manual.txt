@@ -1,4 +1,4 @@
-Quoridor Version 1.1 Manual
+Quoridor Version 1.2 Manual
 There are several important things to note before making any changes to the program.
 Make sure to read the description of all classes and structs.
 
@@ -218,9 +218,13 @@ game, otherwise starts a game with the specified amount of players, provided it 
 	to 0 if absent, such as "Quoridor.exe 3 2" being a game with 1 human player and 2 CPUs.
 
 Version History
-1.0: 9/17/2017- Inital code created by David Brown
-1.1: 9/19/2017- changes made by David Brown
+1.0: 09/17/2017- Inital code created by David Brown
+1.1: 09/19/2017- changes made by David Brown
 	.Fixed some bugs allowing illegal moves
 	.Added a thick border around the board's edges
 	.Allowed command line input
-	.Input message now shows up each time incorrect input is made 
+	.Input message now shows up each time incorrect input is made
+1.2: 10/4/2017- changes made by David Brown
+	.Added stateString() method to Board, returning a string with all variables
+	necessary to recreate the state at any time
+	.Added a new Board constuctor using a string from stateString() as input
