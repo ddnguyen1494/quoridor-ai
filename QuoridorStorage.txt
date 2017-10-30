@@ -1,0 +1,166 @@
+Overall structure (treat | as concatenation)
+number of players|current player|0|players
+number of players|current player|1|walls|players
+number of players- 1-2 bits: 0- 2 players, 10- 3 players, 11- 4 players
+current player- 2 players: 1 bit, 0 = player 1's turn, 1 = player 2's turn
+  3-4 players: 2 bits, 00 = player 1's turn, 01 = player 2's turn, 10 = player 3's turn, 11 = player 4's turn
+When the next bit is 0, there are no walls and it goes straight to the players segment.
+walls (if present 64-84 bits)- bit n is 0, no wall, otherwise bit n+1 = 0, horizontal wall, bit n+1 = 1, vertical wall
+players- walls|x|y
+10 bits each for 2 players, walls = num0 % 11; num1 = num0 / 11; x = num1 % 9; y = num1 / 9;
+9 bits each for 3 players, walls = num0 % 7; num1 = num0 / 7; x = num1 % 9; y = num1 / 9;
+9 bits each for 4 players, walls = num0 % 6; num1 = num0 / 6; x = num1 % 9; y = num1 / 9;
+2 players: min = 1 + 1 + 1 + 0 + 20 = 23 bits (3 bytes)
+    max = 1 + 1 + 1 + 84 + 20 = 107 bits (14 bytes)
+3 players: min = 2 + 2 + 1 + 0 + 28 = 33 bits (5 bytes)
+    max = 2 + 2 + 1 + 84 + 28 = 117 bits (15 bytes)
+4 players: min = 2 + 2 + 1 + 0 + 36 = 41 bits (6 bytes)
+    max = 2 + 2 + 1 + 84 + 36 = 125 bits (16 bytes)
+
+How structure was derived
+The player is the easiest to derive. There are 9 possibilites for x position and 9 possibilites for y position.
+Depending on the amount of players, the amount of walls can be 0-10, 0-6, or 0-5, thus 11, 7, or 6 possibilities.
+With 2 players, there are (11 * 9 * 9)^2 = 891^2 = 793,881 possibilites (20 bits).
+With 3 players, there are (7 * 9 * 9)^3 = 567^3 = 182,284,263 possibilites (28 bits).
+With 4 players, there are (6 * 9 * 9)^4 = 486^4 = 55,788,550,416 possibilites (36 bits).
+For the walls, note that each wall must take one '+' position in the graph below. There are 64 positions.
+	//=================\\
+	|| V | | |a| | | | ||
+	||-VHHH+-+-+-+-+-+-||
+	|| V | | | | | | | ||
+	||-+-+-+-+-+-+-+-+-||
+	|| | | | | | | | | ||
+	||-+-+-+-+-+-+-+-+-||
+	|| | | | | | | | | ||
+	||-+-+-+-+-+-+-+-+-||
+	|| | | | | | | | | ||
+	||-+-+-+-+-+-+-+-+-||
+	|| | | | | | | | | ||
+	||-+-+-+-+-+-+-+-+-||
+	|| | | | | | | | | ||
+	||-+-+-+-+-+-+-+-+-||
+	|| | | | | | | | | ||
+	||-+-+-+HHH+-+-+-+-||
+	|| | | | |b| | | | ||
+	\\=================//
+For each intersection, either it is empty (0) or there is a wall (1).
+When there is a wall, it is either horizontal (0) or vertical (1).
+Since there can be at most 20 walls, the maximum size of the structure
+is 64 + 20 = 84 bits.
+
+decoding, assume bit counter c (note, not checked for errors):
+int c = 0;
+if (!bit[c])
+{
+	numPlayers = 2;
+	c++;
+	if (!bit[c])
+	{
+		currentPlayer = 0;
+	}
+	else
+	{
+		currentPlayer = 1;
+	}
+}
+else
+{
+	c++; //corresponds to bit 1
+	if (!bit[c])
+	{
+		numPlayers = 3;
+	}
+	else
+	{
+		numPlayers = 4;
+	}
+	c++;
+	if (!bit[c])
+	{
+		c++;
+		if (!bit[c])
+		{
+			currentPlayer = 0;
+		}
+		else
+		{
+			currentPlayer = 1;
+		}
+	}
+	else
+	{
+		c++;
+		if (!bit[c])
+		{
+			currentPlayer = 2;
+		}
+		else
+		{
+			currentPlayer = 3;
+		}
+	}
+}
+c++;
+if (bit[c])
+{
+	c++;
+	for (int j = 1; j <= 15; j+= 2)
+	{
+		for (int i = 1; i <= 15; i+= 2)
+		{
+			if (bit[c])
+			{
+				c++;
+				if (!bit[c])
+				{
+					collisions[i,j] = 'H';
+				}
+				else
+				{
+				collisions[i,j] = 'V';
+				}
+			}
+			c++;
+		}
+	}
+}
+else
+{
+	c++;
+}
+long num = 0;
+int bound = 20;
+long div = 891;
+long div2 = 11;
+if (numPlayers == 3)
+{
+	bound = 28;
+	div = 567;
+	div2 = 7;
+}
+else if (numPlayers == 4)
+{
+	bound = 36;
+	div = 486;
+	div2 = 6;
+}
+for (int i = 0; i < bound; i++)
+{
+	num *= 2;
+	if (bits[c])
+	{
+		num++;
+	}
+	c++;
+}
+long rem = 0;
+for (int j = 0; j < numPlayers; j++)
+{
+	num = Math.DivRem(num, div, out rem)
+	long temp;
+	rem = Math.DivRem(rem, div2, out temp)
+	currentPlayers[i].wallsRemaining = (int)temp;
+	rem = Math.DivRem(rem, 9, out temp)
+	currentPlayers[i].x = 2 * (int)temp;
+	currentPlayers[i].y = 2 * (int)rem;
+}
