@@ -23,7 +23,7 @@ namespace Assets.Scripts
         public BitArray NextMove(BitArray state)
         {
             currentState = new Node(state, _ply_depth);
-            return Minimax.Search(currentState);
+            return AlphaBeta.Search(currentState);
         }
 
         public static int Evaluate(BitArray state)
