@@ -6,10 +6,11 @@ using System.Text;
 
 namespace Assets.Scripts
 {
-    static class AgentHelper
+    static class StateDecoder
     {
-        public static void DecodeState(out PlayerInfo[] currentPlayers, BitArray state, out int currentPlayer, ref List<WallPeg> WallPegList)
+        public static void DecodeState(BitArray state, out PlayerInfo[] currentPlayers,  out int currentPlayer, out List<WallPeg> WallPegList)
         {
+            WallPegList = new List<WallPeg>();
             int c = 0;
             int numPlayers;
             if (!state[c])
@@ -163,17 +164,21 @@ namespace Assets.Scripts
                 currentPlayers[j].y = 2 * (int)rem;
             }
         }
-        internal static List<BitArray> GetAllPossibleMoves(BitArray state)
-        {
-            PlayerInfo[] currentPlayers;
-            List<WallPeg> wallPegList = new List<WallPeg>();
-            int currentPlayer;
-            DecodeState(out currentPlayers, state, out currentPlayer, ref wallPegList);
+        //internal static List<BitArray> GetAllPossibleMoves(BitArray state)
+        //{
+        //    PlayerInfo[] currentPlayers;
+        //    List<WallPeg> wallPegList = new List<WallPeg>();
+        //    int currentPlayer;
+        //    DecodeState(out currentPlayers, state, out currentPlayer, ref wallPegList);
             
-            //Need algorithm to generate possible moves from current state
+        //    //Need algorithm to generate possible moves from current state
 
 
-            return null;
+        //    return null;
+        //}
+        public static PlayerInfo[] DecodePlayerInfo(BitArray state)
+        {
+            throw new NotImplementedException();
         }
     }
 }

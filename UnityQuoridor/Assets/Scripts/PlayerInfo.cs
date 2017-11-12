@@ -16,10 +16,13 @@ public class PlayerInfo : MonoBehaviour {
 	public int id;
 	public bool currentTurn = false;
 
-	public bool checkWin()
+	public bool CheckWin()
 	{
 		return (x == goalX || y == goalY);
 	}
 
-
+    public int GetDistanceToGoal()  
+    {
+        return goalX - x;//2 Players for now
+    }
 }

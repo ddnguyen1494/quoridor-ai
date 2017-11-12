@@ -160,7 +160,7 @@ public class GameManager : MonoBehaviour {
 			yield return StartCoroutine (PlayersTurn (1)); //player1's turn
 			Debug.Log("Player 1's turn has ended.");
 			// Check to see if player 1 has won
-			if (playerStatus[0].checkWin())
+			if (playerStatus[0].CheckWin())
 			{
 				Debug.Log("Player 1 wins.");
 				gameOver = true;
@@ -172,7 +172,7 @@ public class GameManager : MonoBehaviour {
 			yield return StartCoroutine (PlayersTurn (2)); //player2's turn
 			Debug.Log("Player 2's turn has ended.");
 			// Check to see if player 2 has won
-			if (playerStatus[1].checkWin())
+			if (playerStatus[1].CheckWin())
 			{
 				Debug.Log("Player 2 wins.");
 				gameOver = true;
