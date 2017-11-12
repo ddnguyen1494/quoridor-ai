@@ -8,12 +8,13 @@ public class GameManager : MonoBehaviour {
 
 	const int maxPlayers = 4;
 	const int boardSize = 9;
-	const int numPlayers = 2;
+	const int minPlayers = 2;
+	int numPlayers = 2;
 
 	public Camera cam;
 
 	public GameObject[] players;
-	private PlayerInfo[] playerStatus = new PlayerInfo[numPlayers];
+	private PlayerInfo[] playerStatus; // initialized in Start
 
 	public GameObject[,] board = new GameObject[boardSize, boardSize];
 	private gameSquareInfo[,] boardStatus = new gameSquareInfo[boardSize , boardSize];
@@ -30,7 +31,7 @@ public class GameManager : MonoBehaviour {
 
 	public float startDelay = 1f;
 	private WaitForSeconds m_StartWait;
-	private WaitForSeconds m_EndWait;
+	//private WaitForSeconds m_EndWait; // Unused?
 
 	int totalWalls = 20;
 	bool gameOver = false;
@@ -39,6 +40,7 @@ public class GameManager : MonoBehaviour {
 	public Text playersTurnText;
 	public Text wallsRemainText;
 	public Text WinnerText;
+	public Text MessageText;
 
 	Vector3 newPosition;
 
@@ -47,9 +49,15 @@ public class GameManager : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+		numPlayers = MainMenu.playerTotal;
+		if(numPlayers == 2) //2 players
+			playerStatus = new PlayerInfo[minPlayers];
+		else //4 players
+			playerStatus = new PlayerInfo[maxPlayers];
 		gmPanel.SetActive (false);
+		MessageText.text = ""; 
 		MakeBoard (); // make references to board
-		SpawnPlayers (); // make references to players
+		SpawnPlayers (); // make references to players (and Ai's)
 
 		m_StartWait = new WaitForSeconds (startDelay);
 		StartCoroutine (GameLoop());
@@ -116,7 +124,7 @@ public class GameManager : MonoBehaviour {
 			playerStatus[i].id = i + 1;
 		}
 
-		//For 2 players set up start information this way
+		// For 2 players set up start information this way
 		if (numPlayers == 2) {
 			playerStatus[0].transform.position = playerStatus [0].spawnPoint;
 			playerStatus[0].x = 8;
@@ -131,8 +139,40 @@ public class GameManager : MonoBehaviour {
 			playerStatus[1].goalX = 8;
 			playerStatus[1].goalY = -1;
 			boardStatus[0, 4].isOpen = false;
-
+			if (MainMenu.playerSettings == 1) // If PvE was selected make 2nd player a Bot
+				playerStatus [1].isAi = true;
 		}
+		// For 4 players set up start information this way
+		else if (numPlayers == 4) {
+			playerStatus[0].transform.position = playerStatus [0].spawnPoint;
+			playerStatus[0].x = 8;
+			playerStatus[0].y = 4;
+			playerStatus[0].goalX = 0;
+			playerStatus[0].goalY = -1;
+			boardStatus[8, 4].isOpen = false;
+
+			playerStatus[1].transform.position = playerStatus [1].spawnPoint;
+			playerStatus[1].x = 0;
+			playerStatus[1].y = 4;
+			playerStatus[1].goalX = 8;
+			playerStatus[1].goalY = -1;
+			boardStatus[0, 4].isOpen = false;
+
+			playerStatus[2].transform.position = playerStatus [2].spawnPoint;
+			playerStatus[2].x = 4;
+			playerStatus[2].y = 8;
+			playerStatus[2].goalX = -1;
+			playerStatus[2].goalY = 0;
+			boardStatus[4, 8].isOpen = false;
+
+			playerStatus[3].transform.position = playerStatus [3].spawnPoint;
+			playerStatus[3].x = 4;
+			playerStatus[3].y = 0;
+			playerStatus[3].goalX = -1;
+			playerStatus[3].goalY = 8;
+			boardStatus[4, 0].isOpen = false;
+		}
+
 	}
 
 	private IEnumerator GameLoop()
@@ -150,48 +190,71 @@ public class GameManager : MonoBehaviour {
 			playerStatus [i].wallsLeft = wallAmt;
 			wallsRemainText.text += "Player " + (i + 1) + "'s Walls: " + playerStatus [i].wallsLeft + "\n";
 		}
-		yield return m_StartWait;
+		yield return null;
 	}
 
 	private IEnumerator PlayGame()
 	{
-		while (!gameOver) {
-			Debug.Log("Player 1's turn Begin.");
-			yield return StartCoroutine (PlayersTurn (1)); //player1's turn
-			Debug.Log("Player 1's turn has ended.");
-			// Check to see if player 1 has won
-			if (playerStatus[0].CheckWin())
-			{
-				Debug.Log("Player 1 wins.");
-				gameOver = true;
-				GameOver (1);
-				break;
-			}
+		int turnOrder = 0;
 
-			Debug.Log("Player 2's turn Begin.");
-			yield return StartCoroutine (PlayersTurn (2)); //player2's turn
-			Debug.Log("Player 2's turn has ended.");
-			// Check to see if player 2 has won
-			if (playerStatus[1].CheckWin())
+		while (!gameOver) {
+					Debug.Log("Player " + (turnOrder+1) + "'s turn Begin.");
+			if(!playerStatus[turnOrder].isAi)
+				yield return StartCoroutine (PlayersTurn (turnOrder)); // Human Players Turn
+			else
+				yield return StartCoroutine (AITurn (turnOrder)); // AI Players Turn
+					Debug.Log("Player "+ (turnOrder+1) + "'s turn has ended.");
+			// Check to see if player has won
+			if (playerStatus[turnOrder].CheckWin())
 			{
-				Debug.Log("Player 2 wins.");
+				Debug.Log("Player " + (turnOrder+1) + "wins.");
 				gameOver = true;
-				GameOver (2);
+				GameOver (turnOrder+1);
 				break;
 			}
+			if (++turnOrder == numPlayers)
+				turnOrder = 0;
+
 		} //end while loop
 
 		yield return null;
 	}
-
-	private IEnumerator PlayersTurn(int playerNum)
+	private IEnumerator AITurn(int playerNum) /// AI Controls
 	{
-		int p = playerNum - 1;
+		MessageText.text = "";
+		//move or choose wall
+		playerStatus [playerNum].currentTurn = true;
+		playersTurnText.text = "Player " + (playerNum+1) + "'s Turn!";
+		yield return m_StartWait; // wait a second so Ai turn doesn't seem instant.
+		while (playerStatus [playerNum].currentTurn) {
+			// Decide whether to Place wall or Move, then execute the placement or movement.
+		//temp Moving for testing:
+			MoveDown (playerNum, 1);
+			playerStatus [playerNum].currentTurn = false;
+		//temp Moving End [Remove above statements up to start of testing]
+
+
+			yield return null;
+		} // end of While Loop
+	}
+
+	private IEnumerator PlayersTurn(int p) // Player Controls
+	{
+		MessageText.text = "";
+		//int p = playerNum - 1;
 		//move or choose wall
 		playerStatus [p].currentTurn = true;
-		playersTurnText.text = "Player " + playerNum + "'s Turn!";
-		while(playerStatus[playerNum-1].currentTurn)
+		playersTurnText.text = "Player " + (p+1) + "'s Turn!";
+		while(playerStatus[p].currentTurn)
 		{
+			// Passing Turn
+			if (Input.GetKeyUp (KeyCode.X)) {
+				playersTurnText.text = "Player " + (p+1) + " Passes!";
+				playerStatus [p].currentTurn = false;
+				yield return m_StartWait;
+				Debug.Log("Player " + (p+1) + "Passes.");
+			}
+			// Moving Handler
 			if (Input.GetMouseButtonUp(0)) {
 				GameObject tempObj;
 				ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -334,7 +397,7 @@ public class GameManager : MonoBehaviour {
 						tempPeg = tempObj.GetComponent<WallPeg>();
 
 						//if wall can be placed, place it and end turn
-						if (CheckWallH (tempPeg.x, tempPeg.y)) {
+						if (playerStatus[p].wallsLeft > 0 && CheckWallH (tempPeg.x, tempPeg.y)) {
 							playerStatus [p].currentTurn = false;
 							playerStatus [p].wallsLeft--;
 							UpdateWallRemTxt ();
@@ -354,7 +417,7 @@ public class GameManager : MonoBehaviour {
 						tempPeg = tempObj.GetComponent<WallPeg> ();
 
 						//if wall can be placed, place it and end turn
-						if (CheckWallV (tempPeg.x, tempPeg.y)) {
+						if (playerStatus[p].wallsLeft > 0 && CheckWallV (tempPeg.x, tempPeg.y)) {
 							playerStatus [p].currentTurn = false;
 							playerStatus [p].wallsLeft--;
 							UpdateWallRemTxt ();
@@ -464,11 +527,13 @@ public class GameManager : MonoBehaviour {
 				wallPegStatus [xPos, yPos].isOpen = true; //dont need?
 				boardStatus [xPos, yPos].hasBotWall = false;
 				boardStatus [xPos, yPos+1].hasBotWall = false;
+				MessageText.text = "Can't Place Horizontal wall there!";
 				Debug.Log ("CANT PLACE H WALL CHEATER!!!");
 				return false;
 			}
 
 		} else{
+			MessageText.text = "Can't Place Horizontal wall there!";
 			Debug.Log ("CANT PLACE H WALL CHEATER!!!");
 			return false;
 		}
@@ -495,10 +560,12 @@ public class GameManager : MonoBehaviour {
 				wallPegStatus [xPos, yPos].isOpen = true; //dont need?
 				boardStatus [xPos, yPos].hasRightWall = false;
 				boardStatus [xPos+1, yPos].hasRightWall = false;
+				MessageText.text = "Can't Place Vertical wall there!";
 				Debug.Log ("CANT PLACE V WALL CHEATER!!!");
 				return false;
 			}
 		} else {
+			MessageText.text = "Can't Place Vertical wall there!";
 			Debug.Log ("CANT PLACE V WALL CHEATER!!!");
 			return false;
 		}
@@ -658,4 +725,10 @@ public class GameManager : MonoBehaviour {
 	{
 		SceneManager.LoadScene(SceneManager.GetActiveScene().name);
 	}
+
+	public void LoadScene()
+	{
+		SceneManager.LoadScene (0);
+	}
+
 } // end

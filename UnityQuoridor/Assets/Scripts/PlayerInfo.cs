@@ -15,14 +15,16 @@ public class PlayerInfo : MonoBehaviour {
 	public int wallsLeft;
 	public int id;
 	public bool currentTurn = false;
+	public bool isAi = false; // new
 
 	public bool CheckWin()
 	{
 		return (x == goalX || y == goalY);
 	}
 
-    public int GetDistanceToGoal()  
-    {
-        return goalX - x;//2 Players for now
-    }
+	public int GetDistanceToGoal()  
+	{
+		return goalX - x;//2 Players for now
+	}
+
 }
