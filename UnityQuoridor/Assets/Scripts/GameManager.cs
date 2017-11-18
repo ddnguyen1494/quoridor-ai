@@ -1,26 +1,24 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement; //to restart scene
-
 public class GameManager : MonoBehaviour {
 
-	const int maxPlayers = 4;
-	const int boardSize = 9;
-	const int minPlayers = 2;
-	int numPlayers = 2;
+    const int maxPlayers = 4;
+    const int boardSize = 9;
+    const int minPlayers = 2;
+    int numPlayers = 2;
 
-	public Camera cam;
+    public Camera cam;
 
 	public GameObject[] players;
 	private PlayerInfo[] playerStatus; // initialized in Start
 
 	public GameObject[,] board = new GameObject[boardSize, boardSize];
-	private gameSquareInfo[,] boardStatus = new gameSquareInfo[boardSize , boardSize];
+    private gameSquareInfo[,] boardStatus;// = new gameSquareInfo[boardSize, boardSize];
 
-	public GameObject[,] pegs = new GameObject[boardSize-1,boardSize-1]; 
-	private WallPeg[,] wallPegStatus = new WallPeg[boardSize-1,boardSize-1];
+    public GameObject[,] pegs = new GameObject[boardSize-1,boardSize-1];
+    private WallPeg[,] wallPegStatus;// = new WallPeg[boardSize-1,boardSize-1];
 
 	public GameObject GamePiece1;
 	public GameObject GamePiece2;
@@ -35,26 +33,36 @@ public class GameManager : MonoBehaviour {
 
 	int totalWalls = 20;
 	bool gameOver = false;
-	int[,] accessible = new int[boardSize,boardSize];
+    int[,] accessible;// = new int[boardSize,boardSize];
 
 	public Text playersTurnText;
 	public Text wallsRemainText;
 	public Text WinnerText;
 	public Text MessageText;
 
-	Vector3 newPosition;
+	//Vector3 newPosition;
 
 	Ray ray;
 	RaycastHit hit;
 
-	// Use this for initialization
-	void Start () {
+    Assets.Board Board;
+
+    // Use this for initialization
+    void Start () {
 		numPlayers = MainMenu.playerTotal;
-		if(numPlayers == 2) //2 players
-			playerStatus = new PlayerInfo[minPlayers];
-		else //4 players
-			playerStatus = new PlayerInfo[maxPlayers];
-		gmPanel.SetActive (false);
+        //if(numPlayers == 2) //2 players
+        //	playerStatus = new PlayerInfo[minPlayers];
+        //else //4 players
+        //	playerStatus = new PlayerInfo[maxPlayers];
+
+        //Creating the board and get reference to it's member variables for now
+        Board = new Assets.Board(numPlayers);
+        playerStatus = Board.playerStatus;
+        wallPegStatus = Board.wallPegStatus;
+        boardStatus = Board.boardStatus;
+        accessible = Board.accessible;
+
+        gmPanel.SetActive (false);
 		MessageText.text = ""; 
 		MakeBoard (); // make references to board
 		SpawnPlayers (); // make references to players (and Ai's)
@@ -197,8 +205,9 @@ public class GameManager : MonoBehaviour {
 	{
 		int turnOrder = 0;
 
-		while (!gameOver) {
-					Debug.Log("Player " + (turnOrder+1) + "'s turn Begin.");
+		while (!gameOver)
+        {
+			Debug.Log("Player " + (turnOrder+1) + "'s turn Begin.");
 			if(!playerStatus[turnOrder].isAi)
 				yield return StartCoroutine (PlayersTurn (turnOrder)); // Human Players Turn
 			else
@@ -214,7 +223,6 @@ public class GameManager : MonoBehaviour {
 			}
 			if (++turnOrder == numPlayers)
 				turnOrder = 0;
-
 		} //end while loop
 
 		yield return null;
@@ -229,7 +237,7 @@ public class GameManager : MonoBehaviour {
 		while (playerStatus [playerNum].currentTurn) {
 			// Decide whether to Place wall or Move, then execute the placement or movement.
 		//temp Moving for testing:
-			MoveDown (playerNum, 1);
+			Board.MoveDown (playerNum, 1);
 			playerStatus [playerNum].currentTurn = false;
 		//temp Moving End [Remove above statements up to start of testing]
 
@@ -278,7 +286,7 @@ public class GameManager : MonoBehaviour {
 							// going down by 1 (checks on location and for walls)
 							if (xDiff == 1 && yDiff == 0 &&
 								!boardStatus [playerStatus [p].x, playerStatus [p].y].hasBotWall) {
-								MoveDown (p, 1);
+								Board.MoveDown (p, 1);
 								playerStatus [p].currentTurn = false;
 							}
 							// going down jumping over 1 player directly
@@ -286,7 +294,7 @@ public class GameManager : MonoBehaviour {
 								!boardStatus [playerStatus [p].x, playerStatus [p].y].hasBotWall &&
 								!boardStatus [playerStatus [p].x+1, playerStatus [p].y].isOpen &&
 								!boardStatus [playerStatus [p].x+1, playerStatus [p].y].hasBotWall) {
-								MoveDown (p, 2);
+								Board.MoveDown (p, 2);
 								playerStatus [p].currentTurn = false;
 							}
 							// going Down by 1 AND to the Left by 1
@@ -298,7 +306,7 @@ public class GameManager : MonoBehaviour {
 									(!boardStatus [playerStatus [p].x, playerStatus [p].y-1].hasRightWall && //going left then down
 										boardStatus [playerStatus [p].x, playerStatus [p].y-2].hasRightWall &&
 										!boardStatus [playerStatus [p].x, playerStatus [p].y-1].isOpen)) ){
-								MoveDown (p,1,true);
+								Board.MoveDown (p,1,true);
 								playerStatus [p].currentTurn = false;
 							}
 
@@ -306,7 +314,7 @@ public class GameManager : MonoBehaviour {
 							// going up by 1 (checks on location and for walls)
 							else if (xDiff == -1 && yDiff == 0 &&
 							 !boardStatus [playerStatus [p].x-1, playerStatus [p].y].hasBotWall) {
-								MoveUp (p, 1);
+								Board.MoveUp (p, 1);
 								playerStatus [p].currentTurn = false;
 							}
 							// going up jumping over 1 player directly
@@ -314,7 +322,7 @@ public class GameManager : MonoBehaviour {
 							 !boardStatus [playerStatus [p].x-1, playerStatus [p].y].hasBotWall &&
 							 !boardStatus [playerStatus [p].x-1, playerStatus [p].y].isOpen &&
 							 !boardStatus [playerStatus [p].x-2, playerStatus [p].y].hasBotWall) {
-								MoveUp (p, 2);
+								Board.MoveUp (p, 2);
 								playerStatus [p].currentTurn = false;
 							}
 							// going Up by 1 AND Right by 1
@@ -326,7 +334,7 @@ public class GameManager : MonoBehaviour {
 								 (!boardStatus [playerStatus [p].x, playerStatus [p].y].hasRightWall && //going Right then Up
 								   boardStatus [playerStatus [p].x, playerStatus [p].y+1].hasRightWall &&
 								  !boardStatus [playerStatus [p].x, playerStatus [p].y+1].isOpen))  ){
-								MoveUp (p, 1, true);
+								Board.MoveUp (p, 1, true);
 								playerStatus [p].currentTurn = false;
 
 							}
@@ -335,7 +343,7 @@ public class GameManager : MonoBehaviour {
 							// going Left by 1 (checks on location and for walls)
 							else if(xDiff == 0 && yDiff == -1 &&
 							 !boardStatus [playerStatus [p].x, playerStatus [p].y-1].hasRightWall) {
-								MoveLeft (p,1);
+								Board.MoveLeft (p,1);
 								playerStatus [p].currentTurn = false;
 							}
 							// going Left jumping over 1 player directly
@@ -343,7 +351,7 @@ public class GameManager : MonoBehaviour {
 							 !boardStatus [playerStatus [p].x, playerStatus [p].y-1].hasRightWall &&
 							 !boardStatus [playerStatus [p].x, playerStatus [p].y-1].isOpen &&
 							 !boardStatus [playerStatus [p].x, playerStatus [p].y-2].hasRightWall) {
-								MoveLeft (p,2);
+								Board.MoveLeft (p,2);
 								playerStatus [p].currentTurn = false;
 							}
 							//going Left by 1 AND Up by 1
@@ -355,7 +363,7 @@ public class GameManager : MonoBehaviour {
 									(!boardStatus [playerStatus [p].x-1, playerStatus [p].y].hasBotWall && //going up then left
 										boardStatus [playerStatus [p].x-2, playerStatus [p].y].hasBotWall &&
 										!boardStatus [playerStatus [p].x-1, playerStatus [p].y].isOpen))  ){
-								MoveLeft (p, 1, true);
+								Board.MoveLeft (p, 1, true);
 								playerStatus [p].currentTurn = false;
 
 							}
@@ -364,14 +372,14 @@ public class GameManager : MonoBehaviour {
 							// going Right by 1 (checks on location and for walls)
 							else if(xDiff == 0 && yDiff == 1 &&
 							 !boardStatus [playerStatus [p].x, playerStatus [p].y].hasRightWall) {
-								MoveRight (p,1);
+								Board.MoveRight (p,1);
 								playerStatus [p].currentTurn = false;
 							}
 							else if(xDiff == 0 && yDiff == 2 &&
 							 !boardStatus [playerStatus [p].x, playerStatus [p].y].hasRightWall &&
 							 !boardStatus [playerStatus [p].x, playerStatus [p].y+1].isOpen &&
 							 !boardStatus [playerStatus [p].x, playerStatus [p].y+1].hasRightWall) {
-								MoveRight (p,2);
+								Board.MoveRight (p,2);
 								playerStatus [p].currentTurn = false;
 							}
 							// going Right by 1 AND Down by 1
@@ -383,7 +391,7 @@ public class GameManager : MonoBehaviour {
 							  (!boardStatus [playerStatus [p].x, playerStatus [p].y].hasBotWall && //going Down then Right
 							 	boardStatus [playerStatus [p].x+1, playerStatus [p].y].hasBotWall &&
 							   !boardStatus [playerStatus [p].x+1, playerStatus [p].y].isOpen)) ){
-									MoveRight (p,1,true);
+									Board.MoveRight (p,1,true);
 									playerStatus [p].currentTurn = false;
 							}
 						}
@@ -397,7 +405,8 @@ public class GameManager : MonoBehaviour {
 						tempPeg = tempObj.GetComponent<WallPeg>();
 
 						//if wall can be placed, place it and end turn
-						if (playerStatus[p].wallsLeft > 0 && CheckWallH (tempPeg.x, tempPeg.y)) {
+						if (playerStatus[p].wallsLeft > 0 && Board.CheckWallH (tempPeg.x, tempPeg.y)) {
+                            PlaceWallH(tempPeg.x, tempPeg.y);
 							playerStatus [p].currentTurn = false;
 							playerStatus [p].wallsLeft--;
 							UpdateWallRemTxt ();
@@ -417,7 +426,8 @@ public class GameManager : MonoBehaviour {
 						tempPeg = tempObj.GetComponent<WallPeg> ();
 
 						//if wall can be placed, place it and end turn
-						if (playerStatus[p].wallsLeft > 0 && CheckWallV (tempPeg.x, tempPeg.y)) {
+						if (playerStatus[p].wallsLeft > 0 && Board.CheckWallV (tempPeg.x, tempPeg.y)) {
+                            PlaceWallV(tempPeg.x, tempPeg.y);
 							playerStatus [p].currentTurn = false;
 							playerStatus [p].wallsLeft--;
 							UpdateWallRemTxt ();
@@ -430,305 +440,308 @@ public class GameManager : MonoBehaviour {
 			yield return null;
 		}// end of current turn while loop
 	}
-		
-	//if turn jumping is false it will move either 1 space or 2(jumping directly)
-	//if turn jumping is true it will move down and left
-	void MoveDown(int p, int movement, bool turnjumping=false) 
-	{
-		if (!turnjumping) {
-			playerStatus [p].transform.position = boardStatus [playerStatus [p].x + movement, playerStatus [p].y].transform.position + new Vector3 (0, 0, -1f);
-			boardStatus [playerStatus [p].x, playerStatus [p].y].isOpen = true;
-			boardStatus [playerStatus [p].x + movement, playerStatus [p].y].isOpen = false;
-			playerStatus [p].x += movement; 
-		} 
-		else {
-			playerStatus [p].transform.position = boardStatus [playerStatus [p].x + movement, playerStatus [p].y - movement].transform.position + new Vector3 (0, 0, -1f);
-			boardStatus [playerStatus [p].x, playerStatus [p].y].isOpen = true;
-			boardStatus [playerStatus [p].x + movement, playerStatus [p].y - movement].isOpen = false;
-			playerStatus [p].x += movement; 
-			playerStatus [p].y -= movement;
-		}
-	}
 
-	//if turn jumping is false it will move either 1 space or 2(jumping directly)
-	//if turn jumping is true it will move up and right
-	void MoveUp(int p, int movement, bool turnjumping=false)
-	{
-		if (!turnjumping) {
-			playerStatus [p].transform.position = boardStatus [playerStatus [p].x - movement, playerStatus [p].y].transform.position + new Vector3 (0, 0, -1f);
-			boardStatus [playerStatus [p].x, playerStatus [p].y].isOpen = true;
-			boardStatus [playerStatus [p].x - movement, playerStatus [p].y].isOpen = false;
-			playerStatus [p].x -= movement;
-		}
-		else {
-			playerStatus [p].transform.position = boardStatus [playerStatus [p].x - movement, playerStatus [p].y + movement].transform.position + new Vector3 (0, 0, -1f);
-			boardStatus [playerStatus [p].x, playerStatus [p].y].isOpen = true;
-			boardStatus [playerStatus [p].x - movement, playerStatus [p].y + movement].isOpen = false;
-			playerStatus [p].x -= movement; 
-			playerStatus [p].y += movement;
-		}
-	}
+    void GameOver(int playerNum)
+    {
+        gmPanel.SetActive(true);
+        WinnerText.text = "Player " + (playerNum) + " is the Winner!";
 
-	//if turn jumping is false it will move either 1 space or 2(jumping directly)
-	//if turn jumping is true it will move left and up
-	void MoveLeft(int p, int movement, bool turnjumping=false)
-	{
-		if (!turnjumping) {
-			playerStatus [p].transform.position = boardStatus [playerStatus [p].x, playerStatus [p].y - movement].transform.position + new Vector3 (0, 0, -1f);
-			boardStatus [playerStatus [p].x, playerStatus [p].y].isOpen = true;
-			boardStatus [playerStatus [p].x, playerStatus [p].y - movement].isOpen = false;
-			playerStatus [p].y -= movement;
-		}
-		else {
-			playerStatus [p].transform.position = boardStatus [playerStatus [p].x - movement, playerStatus [p].y - movement].transform.position + new Vector3 (0, 0, -1f);
-			boardStatus [playerStatus [p].x, playerStatus [p].y].isOpen = true;
-			boardStatus [playerStatus [p].x - movement, playerStatus [p].y - movement].isOpen = false;
-			playerStatus [p].x -= movement; 
-			playerStatus [p].y -= movement;
-		}
-	}
+    }
 
-	//if turn jumping is false it will move either 1 space or 2(jumping directly)
-	//if turn jumping is true it will move right and down
-	void MoveRight(int p, int movement, bool turnjumping=false)
-	{
-		if (!turnjumping) {
-			playerStatus [p].transform.position = boardStatus [playerStatus [p].x, playerStatus [p].y + movement].transform.position + new Vector3 (0, 0, -1f);
-			boardStatus [playerStatus [p].x, playerStatus [p].y].isOpen = true;
-			boardStatus [playerStatus [p].x, playerStatus [p].y + movement].isOpen = false;
-			playerStatus [p].y += movement;
-		}
-		else {
-			playerStatus [p].transform.position = boardStatus [playerStatus [p].x + movement, playerStatus [p].y + movement].transform.position + new Vector3 (0, 0, -1f);
-			boardStatus [playerStatus [p].x, playerStatus [p].y].isOpen = true;
-			boardStatus [playerStatus [p].x + movement, playerStatus [p].y + movement].isOpen = false;
-			playerStatus [p].x += movement; 
-			playerStatus [p].y += movement;
-		}
-	}
-		
-	bool CheckWallH(int xPos, int yPos)
-	{
-		if (!boardStatus [xPos, yPos].hasBotWall && 
-			!boardStatus [xPos, yPos + 1].hasBotWall && 
-			 wallPegStatus [xPos, yPos].isOpen) {
+    public void RestartScene()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
 
-			//Checking if winnable
-			// Set as if there is a wall and check if can still be won
-			wallPegStatus [xPos, yPos].isOpen = false; //dont need?
-			boardStatus [xPos, yPos].hasBotWall = true;
-			boardStatus [xPos, yPos+1].hasBotWall = true;
+    public void LoadScene()
+    {
+        SceneManager.LoadScene(0);
+    }
 
-			//if still winnable place the wall, else revert back to no wall
-			if (CheckWinnable (0) && CheckWinnable(1)) {
-				PlaceWallH (xPos, yPos);
-				return true;
-			} else {
-				wallPegStatus [xPos, yPos].isOpen = true; //dont need?
-				boardStatus [xPos, yPos].hasBotWall = false;
-				boardStatus [xPos, yPos+1].hasBotWall = false;
-				MessageText.text = "Can't Place Horizontal wall there!";
-				Debug.Log ("CANT PLACE H WALL CHEATER!!!");
-				return false;
-			}
+    void PlaceWallH(int xPos, int yPos)
+    {
+        Instantiate(wallH, wallPegStatus[xPos, yPos].transform.position, Quaternion.identity);
+        wallPegStatus[xPos, yPos].isOpen = false;
+        boardStatus[xPos, yPos].hasBotWall = true;
+        boardStatus[xPos, yPos + 1].hasBotWall = true;
+    }
 
-		} else{
-			MessageText.text = "Can't Place Horizontal wall there!";
-			Debug.Log ("CANT PLACE H WALL CHEATER!!!");
-			return false;
-		}
+    void PlaceWallV(int xPos, int yPos)
+    {
+        Quaternion wallRot = Quaternion.Euler(0, 0, 90);
 
-	}
+        Instantiate(wallV, wallPegStatus[xPos, yPos].transform.position, wallRot);
+        wallPegStatus[xPos, yPos].isOpen = false;
+        boardStatus[xPos, yPos].hasRightWall = true;
+        boardStatus[xPos + 1, yPos].hasRightWall = true;
+    }
 
-	bool CheckWallV(int xPos, int yPos)
-	{
-		if (!boardStatus [xPos, yPos].hasRightWall &&
-		    !boardStatus [xPos + 1, yPos].hasRightWall &&
-		    wallPegStatus [xPos, yPos].isOpen) {
+    void UpdateWallRemTxt()
+    {
+        wallsRemainText.text = "Remaining Walls:\n\n";
+        for (int i = 0; i < numPlayers; i++)
+        {
+            wallsRemainText.text += "Player " + (i + 1) + "'s Walls: " + playerStatus[i].wallsLeft + "\n";
+        }
+    }
 
-			//Checking if winnable
-			// Set as if there is a wall and check if can still be won
-			wallPegStatus [xPos, yPos].isOpen = false; //dont need?
-			boardStatus [xPos, yPos].hasRightWall = true;
-			boardStatus [xPos+1, yPos].hasRightWall = true;
+    #region Moved to Board class
+    ////if turn jumping is false it will move either 1 space or 2(jumping directly)
+    ////if turn jumping is true it will move down and left
+    //void MoveDown(int p, int movement, bool turnjumping=false) 
+    //{
+    //	if (!turnjumping) {
+    //		playerStatus [p].transform.position = boardStatus [playerStatus [p].x + movement, playerStatus [p].y].transform.position + new Vector3 (0, 0, -1f);
+    //		boardStatus [playerStatus [p].x, playerStatus [p].y].isOpen = true;
+    //		boardStatus [playerStatus [p].x + movement, playerStatus [p].y].isOpen = false;
+    //		playerStatus [p].x += movement; 
+    //	} 
+    //	else {
+    //		playerStatus [p].transform.position = boardStatus [playerStatus [p].x + movement, playerStatus [p].y - movement].transform.position + new Vector3 (0, 0, -1f);
+    //		boardStatus [playerStatus [p].x, playerStatus [p].y].isOpen = true;
+    //		boardStatus [playerStatus [p].x + movement, playerStatus [p].y - movement].isOpen = false;
+    //		playerStatus [p].x += movement; 
+    //		playerStatus [p].y -= movement;
+    //	}
+    //}
 
-			//if still winnable place the wall, else revert back to no wall
-			if (CheckWinnable (0) && CheckWinnable(1)) {
-				PlaceWallV (xPos, yPos);
-				return true;
-			} else {
-				wallPegStatus [xPos, yPos].isOpen = true; //dont need?
-				boardStatus [xPos, yPos].hasRightWall = false;
-				boardStatus [xPos+1, yPos].hasRightWall = false;
-				MessageText.text = "Can't Place Vertical wall there!";
-				Debug.Log ("CANT PLACE V WALL CHEATER!!!");
-				return false;
-			}
-		} else {
-			MessageText.text = "Can't Place Vertical wall there!";
-			Debug.Log ("CANT PLACE V WALL CHEATER!!!");
-			return false;
-		}
+    ////if turn jumping is false it will move either 1 space or 2(jumping directly)
+    ////if turn jumping is true it will move up and right
+    //void MoveUp(int p, int movement, bool turnjumping=false)
+    //{
+    //	if (!turnjumping) {
+    //		playerStatus [p].transform.position = boardStatus [playerStatus [p].x - movement, playerStatus [p].y].transform.position + new Vector3 (0, 0, -1f);
+    //		boardStatus [playerStatus [p].x, playerStatus [p].y].isOpen = true;
+    //		boardStatus [playerStatus [p].x - movement, playerStatus [p].y].isOpen = false;
+    //		playerStatus [p].x -= movement;
+    //	}
+    //	else {
+    //		playerStatus [p].transform.position = boardStatus [playerStatus [p].x - movement, playerStatus [p].y + movement].transform.position + new Vector3 (0, 0, -1f);
+    //		boardStatus [playerStatus [p].x, playerStatus [p].y].isOpen = true;
+    //		boardStatus [playerStatus [p].x - movement, playerStatus [p].y + movement].isOpen = false;
+    //		playerStatus [p].x -= movement; 
+    //		playerStatus [p].y += movement;
+    //	}
+    //}
 
-	}
+    ////if turn jumping is false it will move either 1 space or 2(jumping directly)
+    ////if turn jumping is true it will move left and up
+    //void MoveLeft(int p, int movement, bool turnjumping=false)
+    //{
+    //	if (!turnjumping) {
+    //		playerStatus [p].transform.position = boardStatus [playerStatus [p].x, playerStatus [p].y - movement].transform.position + new Vector3 (0, 0, -1f);
+    //		boardStatus [playerStatus [p].x, playerStatus [p].y].isOpen = true;
+    //		boardStatus [playerStatus [p].x, playerStatus [p].y - movement].isOpen = false;
+    //		playerStatus [p].y -= movement;
+    //	}
+    //	else {
+    //		playerStatus [p].transform.position = boardStatus [playerStatus [p].x - movement, playerStatus [p].y - movement].transform.position + new Vector3 (0, 0, -1f);
+    //		boardStatus [playerStatus [p].x, playerStatus [p].y].isOpen = true;
+    //		boardStatus [playerStatus [p].x - movement, playerStatus [p].y - movement].isOpen = false;
+    //		playerStatus [p].x -= movement; 
+    //		playerStatus [p].y -= movement;
+    //	}
+    //}
 
-	void PlaceWallH(int xPos, int yPos)
-	{
-		Instantiate (wallH, wallPegStatus[xPos,yPos].transform.position, Quaternion.identity);
-		wallPegStatus [xPos, yPos].isOpen = false;
-		boardStatus [xPos, yPos].hasBotWall = true;
-		boardStatus [xPos, yPos+1].hasBotWall = true;
-	}
+    ////if turn jumping is false it will move either 1 space or 2(jumping directly)
+    ////if turn jumping is true it will move right and down
+    //void MoveRight(int p, int movement, bool turnjumping=false)
+    //{
+    //	if (!turnjumping) {
+    //		playerStatus [p].transform.position = boardStatus [playerStatus [p].x, playerStatus [p].y + movement].transform.position + new Vector3 (0, 0, -1f);
+    //		boardStatus [playerStatus [p].x, playerStatus [p].y].isOpen = true;
+    //		boardStatus [playerStatus [p].x, playerStatus [p].y + movement].isOpen = false;
+    //		playerStatus [p].y += movement;
+    //	}
+    //	else {
+    //		playerStatus [p].transform.position = boardStatus [playerStatus [p].x + movement, playerStatus [p].y + movement].transform.position + new Vector3 (0, 0, -1f);
+    //		boardStatus [playerStatus [p].x, playerStatus [p].y].isOpen = true;
+    //		boardStatus [playerStatus [p].x + movement, playerStatus [p].y + movement].isOpen = false;
+    //		playerStatus [p].x += movement; 
+    //		playerStatus [p].y += movement;
+    //	}
+    //}
 
-	void PlaceWallV(int xPos, int yPos)
-	{
-		Quaternion wallRot = Quaternion.Euler(0,0,90);
+    //bool CheckWallH(int xPos, int yPos)
+    //{
+    //	if (!boardStatus [xPos, yPos].hasBotWall && 
+    //		!boardStatus [xPos, yPos + 1].hasBotWall && 
+    //		 wallPegStatus [xPos, yPos].isOpen) {
 
-		Instantiate (wallV, wallPegStatus[xPos,yPos].transform.position, wallRot);
-		wallPegStatus [xPos, yPos].isOpen = false;
-		boardStatus [xPos, yPos].hasRightWall = true;
-		boardStatus [xPos+1, yPos].hasRightWall = true;
-	}
+    //		//Checking if winnable
+    //		// Set as if there is a wall and check if can still be won
+    //		wallPegStatus [xPos, yPos].isOpen = false; //dont need?
+    //		boardStatus [xPos, yPos].hasBotWall = true;
+    //		boardStatus [xPos, yPos+1].hasBotWall = true;
 
-	void UpdateWallRemTxt()
-	{
-		wallsRemainText.text = "Remaining Walls:\n\n";
-		for (int i = 0; i < numPlayers; i++)
-		{
-			wallsRemainText.text += "Player " + (i + 1) + "'s Walls: " + playerStatus [i].wallsLeft + "\n";
-		}
-	}
+    //		//if still winnable place the wall, else revert back to no wall
+    //		if (CheckWinnable (0) && CheckWinnable(1)) {
+    //			PlaceWallH (xPos, yPos);
+    //			return true;
+    //		} else {
+    //			wallPegStatus [xPos, yPos].isOpen = true; //dont need?
+    //			boardStatus [xPos, yPos].hasBotWall = false;
+    //			boardStatus [xPos, yPos+1].hasBotWall = false;
+    //			MessageText.text = "Can't Place Horizontal wall there!";
+    //			Debug.Log ("CANT PLACE H WALL CHEATER!!!");
+    //			return false;
+    //		}
 
-	bool CheckWinnable(int id)
-	{
-		bool possible = false;
-		//gets the possible routes for current player
-		getAccessible(playerStatus[id].x, playerStatus[id].y);
-		//checks to see which player goal is looked at
-		//if any goal state doesn't have access of 1000 then its possible
-		if (playerStatus[id].goalX >= 0)
-		{
-			
-			for (int i = 0; i < boardSize; i++)
-			{
-				if (accessible[playerStatus[id].goalX,i] != 1000)
-				{
-					possible = true;
-					break;
-				}
-			}
-			return possible;
-		}
-		if (playerStatus[id].goalY >= 0)
-		{
-			
-			for (int i = 0; i < boardSize; i++)
-			{
-				if (accessible[i, playerStatus[id].goalY] != 1000)
-				{
-					possible = true;
-					break;
-				}
-			}
-			return possible;
-		}
-		return false;
-	}
+    //	} else{
+    //		MessageText.text = "Can't Place Horizontal wall there!";
+    //		Debug.Log ("CANT PLACE H WALL CHEATER!!!");
+    //		return false;
+    //	}
 
-	void getAccessible(int x, int y, int num, int direction)
-	{
-		if (accessible[x, y] > num)
-		{
-			accessible[x, y] = num;
-			if (direction != 1 && x != 8 && CanMoveDown(x,y))
-			{	
-				getAccessible(x+1, y, num + 1, 3);
-			}
-			if (direction != 2 && y !=8 && CanMoveRight(x, y))
-			{
-				getAccessible(x, y+1, num + 1, 0);
-			}
-			if (direction != 3 && x != 0 && CanMoveUp(x, y))
-			{
-				getAccessible(x-1, y, num + 1, 1);
-			}
-			if (direction != 0 && y !=0 && CanMoveLeft(x, y))
-			{
-				getAccessible(x, y-1, num + 1, 2);
-			}
-		}
-	}
+    //}
 
-	void getAccessible(int x, int y)
-	{
-		for (int i = 0; i < boardSize; i++)
-		{
-			for (int j = 0; j < boardSize; j++)
-			{
-				accessible[i, j] = 1000;
-			}
-		}
-		getAccessible(x, y, 0, -1);
-	}
+    //bool CheckWallV(int xPos, int yPos)
+    //{
+    //	if (!boardStatus [xPos, yPos].hasRightWall &&
+    //	    !boardStatus [xPos + 1, yPos].hasRightWall &&
+    //	    wallPegStatus [xPos, yPos].isOpen) {
 
+    //		//Checking if winnable
+    //		// Set as if there is a wall and check if can still be won
+    //		wallPegStatus [xPos, yPos].isOpen = false; //dont need?
+    //		boardStatus [xPos, yPos].hasRightWall = true;
+    //		boardStatus [xPos+1, yPos].hasRightWall = true;
 
+    //		//if still winnable place the wall, else revert back to no wall
+    //		if (CheckWinnable (0) && CheckWinnable(1)) {
+    //			PlaceWallV (xPos, yPos);
+    //			return true;
+    //		} else {
+    //			wallPegStatus [xPos, yPos].isOpen = true; //dont need?
+    //			boardStatus [xPos, yPos].hasRightWall = false;
+    //			boardStatus [xPos+1, yPos].hasRightWall = false;
+    //			MessageText.text = "Can't Place Vertical wall there!";
+    //			Debug.Log ("CANT PLACE V WALL CHEATER!!!");
+    //			return false;
+    //		}
+    //	} else {
+    //		MessageText.text = "Can't Place Vertical wall there!";
+    //		Debug.Log ("CANT PLACE V WALL CHEATER!!!");
+    //		return false;
+    //	}
 
-	//used for checking if Accessible for winning (NOT USED FOR ACTUAL PLAYER MOVING)
-	bool CanMoveDown(int posX, int posY) //test
-	{
-		// going down by 1
-		if (!boardStatus [posX, posY].hasBotWall)
-			return true;
-		else
-			return false;
-	}
+    //}
 
-	//used for checking if Accessible for winning (NOT USED FOR ACTUAL PLAYER MOVING)
-	bool CanMoveUp(int posX, int posY)
-	{
-		//going up by 1
-		if (!boardStatus [posX - 1, posY].hasBotWall)
-			return true;
-		else
-			return false;
-	}
+    //bool CheckWinnable(int id)
+    //{
+    //	bool possible = false;
+    //	//gets the possible routes for current player
+    //	Board.GetAccessible(playerStatus[id].x, playerStatus[id].y);
+    //	//checks to see which player goal is looked at
+    //	//if any goal state doesn't have access of 1000 then its possible
+    //	if (playerStatus[id].goalX >= 0)
+    //	{
 
-	//used for checking if Accessible for winning (NOT USED FOR ACTUAL PLAYER MOVING)
-	bool CanMoveRight(int posX, int posY) //test
-	{
-		//going Right by 1
-		if (!boardStatus [posX, posY].hasRightWall)
-			return true;
-		else
-			return false;
-	}
+    //		for (int i = 0; i < boardSize; i++)
+    //		{
+    //			if (accessible[playerStatus[id].goalX,i] != 1000)
+    //			{
+    //				possible = true;
+    //				break;
+    //			}
+    //		}
+    //		return possible;
+    //	}
+    //	if (playerStatus[id].goalY >= 0)
+    //	{
 
-	//used for checking if Accessible for winning (NOT USED FOR ACTUAL PLAYER MOVING)
-	bool CanMoveLeft(int posX, int posY) //test
-	{
-		//going Left by 1
-		if (!boardStatus [posX, posY-1].hasRightWall)
-			return true;
-		else
-			return false;
-	}
+    //		for (int i = 0; i < boardSize; i++)
+    //		{
+    //			if (accessible[i, playerStatus[id].goalY] != 1000)
+    //			{
+    //				possible = true;
+    //				break;
+    //			}
+    //		}
+    //		return possible;
+    //	}
+    //	return false;
+    //}
+
+    //void getAccessible(int x, int y, int num, int direction)
+    //{
+    //	if (accessible[x, y] > num)
+    //	{
+    //		accessible[x, y] = num;
+    //		if (direction != 1 && x != 8 && CanMoveDown(x,y))
+    //		{	
+    //			Board.GetAccessible(x+1, y, num + 1, 3);
+    //		}
+    //		if (direction != 2 && y !=8 && CanMoveRight(x, y))
+    //		{
+    //			Board.GetAccessible(x, y+1, num + 1, 0);
+    //		}
+    //		if (direction != 3 && x != 0 && CanMoveUp(x, y))
+    //		{
+    //			Board.GetAccessible(x-1, y, num + 1, 1);
+    //		}
+    //		if (direction != 0 && y !=0 && CanMoveLeft(x, y))
+    //		{
+    //			Board.GetAccessible(x, y-1, num + 1, 2);
+    //		}
+    //	}
+    //}
+
+    //void getAccessible(int x, int y)
+    //{
+    //	for (int i = 0; i < boardSize; i++)
+    //	{
+    //		for (int j = 0; j < boardSize; j++)
+    //		{
+    //			accessible[i, j] = 1000;
+    //		}
+    //	}
+    //	getAccessible(x, y, 0, -1);
+    //}
 
 
-	void GameOver(int playerNum)
-	{
-		gmPanel.SetActive (true);
-		WinnerText.text = "Player " + (playerNum) + " is the Winner!";
 
-	}
+    //used for checking if Accessible for winning (NOT USED FOR ACTUAL PLAYER MOVING)
 
-	public void RestartScene()
-	{
-		SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-	}
+    //bool CanMoveDown(int posX, int posY) //test
+    //{
+    //	// going down by 1
+    //	if (!boardStatus [posX, posY].hasBotWall)
+    //		return true;
+    //	else
+    //		return false;
+    //}
 
-	public void LoadScene()
-	{
-		SceneManager.LoadScene (0);
-	}
+    ////used for checking if Accessible for winning (NOT USED FOR ACTUAL PLAYER MOVING)
+    //bool CanMoveUp(int posX, int posY)
+    //{
+    //	//going up by 1
+    //	if (!boardStatus [posX - 1, posY].hasBotWall)
+    //		return true;
+    //	else
+    //		return false;
+    //}
+
+    ////used for checking if Accessible for winning (NOT USED FOR ACTUAL PLAYER MOVING)
+    //bool CanMoveRight(int posX, int posY) //test
+    //{
+    //	//going Right by 1
+    //	if (!boardStatus [posX, posY].hasRightWall)
+    //		return true;
+    //	else
+    //		return false;
+    //}
+
+    ////used for checking if Accessible for winning (NOT USED FOR ACTUAL PLAYER MOVING)
+    //bool CanMoveLeft(int posX, int posY) //test
+    //{
+    //	//going Left by 1
+    //	if (!boardStatus [posX, posY-1].hasRightWall)
+    //		return true;
+    //	else
+    //		return false;
+    //}
+
+    #endregion
 
 } // end
