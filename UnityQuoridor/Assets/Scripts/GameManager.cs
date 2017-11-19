@@ -2,6 +2,9 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement; //to restart scene
+
+
+
 public class GameManager : MonoBehaviour {
 
     const int maxPlayers = 4;
@@ -45,8 +48,9 @@ public class GameManager : MonoBehaviour {
 	Ray ray;
 	RaycastHit hit;
 
-    Assets.Board Board;
+    Assets.Scripts.Board Board;
 
+    private Assets.Scripts.Agent MyAgent;
     // Use this for initialization
     void Start () {
 		numPlayers = MainMenu.playerTotal;
@@ -56,7 +60,7 @@ public class GameManager : MonoBehaviour {
         //	playerStatus = new PlayerInfo[maxPlayers];
 
         //Creating the board and get reference to it's member variables for now
-        Board = new Assets.Board(numPlayers);
+        Board = new Assets.Scripts.Board(numPlayers);
         playerStatus = Board.playerStatus;
         wallPegStatus = Board.wallPegStatus;
         boardStatus = Board.boardStatus;
@@ -147,9 +151,13 @@ public class GameManager : MonoBehaviour {
 			playerStatus[1].goalX = 8;
 			playerStatus[1].goalY = -1;
 			boardStatus[0, 4].isOpen = false;
-			if (MainMenu.playerSettings == 1) // If PvE was selected make 2nd player a Bot
-				playerStatus [1].isAi = true;
-		}
+            //if (MainMenu.playerSettings == 1) // If PvE was selected make 2nd player a Bot
+            //{
+                playerStatus[1].isAi = true;
+                MyAgent = new Assets.Scripts.Agent();
+            //}
+
+        }
 		// For 4 players set up start information this way
 		else if (numPlayers == 4) {
 			playerStatus[0].transform.position = playerStatus [0].spawnPoint;
@@ -233,18 +241,26 @@ public class GameManager : MonoBehaviour {
 		//move or choose wall
 		playerStatus [playerNum].currentTurn = true;
 		playersTurnText.text = "Player " + (playerNum+1) + "'s Turn!";
-		yield return m_StartWait; // wait a second so Ai turn doesn't seem instant.
-		while (playerStatus [playerNum].currentTurn) {
-			// Decide whether to Place wall or Move, then execute the placement or movement.
-		//temp Moving for testing:
-			Board.MoveDown (playerNum, 1);
-			playerStatus [playerNum].currentTurn = false;
-		//temp Moving End [Remove above statements up to start of testing]
+        Assets.Scripts.ActionFunction action = MyAgent.NextMove(Board);
+        if (!Board.ExecuteFunction(action)) //Moving Pawn
+            yield return null;
+        if (action.param3 == true) // Horizontal Wall
+            PlaceWallH(action.param1, action.param2, action.param3);
+        else
+            PlaceWallH(action.param1, action.param2, action.param3);
+        yield return null;
+        //yield return m_StartWait; // wait a second so Ai turn doesn't seem instant.
+        //while (playerStatus [playerNum].currentTurn) {
+        //	// Decide whether to Place wall or Move, then execute the placement or movement.
+        ////temp Moving for testing:
+        //	Board.MoveDown (playerNum, 1);
+        //	playerStatus [playerNum].currentTurn = false;
+        ////temp Moving End [Remove above statements up to start of testing]
 
 
-			yield return null;
-		} // end of While Loop
-	}
+        //	yield return null;
+        //} // end of While Loop
+    }
 
 	private IEnumerator PlayersTurn(int p) // Player Controls
 	{
@@ -458,22 +474,24 @@ public class GameManager : MonoBehaviour {
         SceneManager.LoadScene(0);
     }
 
-    void PlaceWallH(int xPos, int yPos)
+    public void PlaceWallH(int xPos, int yPos, bool isHorizontal = true) // last parameter is used by AI
     {
         Instantiate(wallH, wallPegStatus[xPos, yPos].transform.position, Quaternion.identity);
-        wallPegStatus[xPos, yPos].isOpen = false;
-        boardStatus[xPos, yPos].hasBotWall = true;
-        boardStatus[xPos, yPos + 1].hasBotWall = true;
+        //Board.PlaceWallH(xPos, yPos, isHorizontal);
+        //wallPegStatus[xPos, yPos].isOpen = false;
+        //boardStatus[xPos, yPos].hasBotWall = true;
+        //boardStatus[xPos, yPos + 1].hasBotWall = true;
     }
 
-    void PlaceWallV(int xPos, int yPos)
+    public void PlaceWallV(int xPos, int yPos, bool isHorizontal = false)// last parameter is used by AI
     {
         Quaternion wallRot = Quaternion.Euler(0, 0, 90);
 
         Instantiate(wallV, wallPegStatus[xPos, yPos].transform.position, wallRot);
-        wallPegStatus[xPos, yPos].isOpen = false;
-        boardStatus[xPos, yPos].hasRightWall = true;
-        boardStatus[xPos + 1, yPos].hasRightWall = true;
+        //Board.PlaceWallV(xPos, yPos, dummy);
+        //wallPegStatus[xPos, yPos].isOpen = false;
+        //boardStatus[xPos, yPos].hasRightWall = true;
+        //boardStatus[xPos + 1, yPos].hasRightWall = true;
     }
 
     void UpdateWallRemTxt()

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Collections;
+using System.Diagnostics;
 
 namespace Assets.Scripts
 {
@@ -10,61 +11,354 @@ namespace Assets.Scripts
     {
         const int PLAYER1 = 0;
         const int PLAYER2 = 1;
-        //private Graph gameTree;
-        Node currentState;
-        private static int _ply_depth;
-        
-        public Agent(int ply_depth)
-        {
-            _ply_depth = ply_depth;
-        }
-        
+        Node root;
+        private int MAX_DEPTH = 12;
+
+        static int current_depth = 0;
+
         //return Agent's decision
-        public BitArray NextMove(BitArray state)
+        public ActionFunction NextMove(Board state)
         {
-            currentState = new Node(state, _ply_depth);
-            return AlphaBeta.Search(currentState);
+            ActionFunction bestAction = new ActionFunction();
+            root = new Node(state, 0, new ActionFunction(), 1);
+            Stopwatch sw = new Stopwatch();
+            try
+            {
+                do
+                {
+                    current_depth++;
+                    sw.Start();
+                    bestAction = AlphaBeta.Search(root);
+                } while (sw.ElapsedMilliseconds / 1000 < 10 && current_depth < MAX_DEPTH); // 10 seconds to think
+            }
+            catch(Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+            }
+            return bestAction;
         }
 
-        public static int Evaluate(BitArray state)
+        public static int Evaluate(Node node)
         {
-            PlayerInfo[] players;
-            int currentPlayer;
-            List<WallPeg> wallPegList;
-            StateDecoder.DecodeState(state, out players, out currentPlayer, out wallPegList);
-            if (players[(currentPlayer + 1) % 1].GetDistanceToGoal() != 0)  //opponent is not at winning state
+            PlayerInfo[] playerStatus = node.State.playerStatus;
+            int currentPlayer = node.Player;
+            //var wallPegStatus = node.State.wallPegStatus;
+            //StateDecoder.DecodeState(state, out players, out currentPlayer, out wallPegList);
+            if (playerStatus[(currentPlayer + 1) % 1].GetDistanceToGoal() != 0)  //opponent is not at winning state
             {
-                return 81 * players[0].GetDistanceToGoal() / players[1].GetDistanceToGoal();
+                return 81 * playerStatus[currentPlayer].GetDistanceToGoal() / playerStatus[(currentPlayer + 1) % 1].GetDistanceToGoal();
             }
-            else
-            {
+            if (currentPlayer == 0) //opponent wins (they want the max score)
                 return int.MaxValue;
-            }
+            return int.MinValue;    //AI wins (lowest score)
         }
 
-        public static bool CutOff(Node node, int depth)
+        public static bool CutOff(Board board, int depth)
         {
-            PlayerInfo[] players = StateDecoder.DecodePlayerInfo(node.State);
-            if (players[PLAYER1].CheckWin() ||
-                players[PLAYER2].CheckWin() ||
-                depth == _ply_depth)
+            if (board.playerStatus[PLAYER1].CheckWin() ||
+                board.playerStatus[PLAYER2].CheckWin() ||
+                depth == current_depth)
                 return true;
             return false;
         }
-
+        
         public static void GenerateSuccessors(Node node)
         {
-            PlayerInfo[] players;
-            int currentPlayer;
-            List<WallPeg> wallPegList;
-            StateDecoder.DecodeState(node.State, out players, out currentPlayer, out wallPegList);
+            //Player 1 prioritizes moving up -> left or right -> Wall -> Down (tentative Move Ordering)
+            PlayerInfo[] playerStatus = node.State.playerStatus;
+            gameSquareInfo[,] boardStatus = node.State.boardStatus;
+            WallPeg[,] wallPegStatus = node.State.wallPegStatus;
+            int p = node.Player;
+            int nextPlayer = (p + 1) % 1;
+            Board newBoard = new Board(node.State);
+            #region Player 1's Successors
+            if (node.Player == PLAYER1)
+            {
+                //Move up
+                if (!boardStatus[playerStatus[p].x - 1, playerStatus[p].y].hasBotWall)
+                {
+                    newBoard.MoveUp(p, 1);
+                    node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveUp, p, 1), nextPlayer));
+                }
+                else
+                {
+                    // going up jumping over 1 player directly
+                    if (!boardStatus[playerStatus[p].x - 1, playerStatus[p].y].hasBotWall &&
+                     !boardStatus[playerStatus[p].x - 1, playerStatus[p].y].isOpen &&
+                     !boardStatus[playerStatus[p].x - 2, playerStatus[p].y].hasBotWall)
+                    {
+                        newBoard = new Board(node.State);
+                        newBoard.MoveUp(p, 2);
+                        node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveUp, p, 2), nextPlayer));
+                    }
+                    // going Up by 1 and Right by 1
+                    if (((!boardStatus[playerStatus[p].x - 1, playerStatus[p].y].hasBotWall && //going up then Right
+                           boardStatus[playerStatus[p].x - 2, playerStatus[p].y].hasBotWall &&
+                          !boardStatus[playerStatus[p].x - 1, playerStatus[p].y].isOpen)
+                          ||
+                         (!boardStatus[playerStatus[p].x, playerStatus[p].y].hasRightWall && //going Right then Up
+                           boardStatus[playerStatus[p].x, playerStatus[p].y + 1].hasRightWall &&
+                          !boardStatus[playerStatus[p].x, playerStatus[p].y + 1].isOpen)))
+                    {
+                        newBoard = new Board(node.State);
+                        newBoard.MoveUp(p, 1, true);
+                        node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveUp, p, 1, true), nextPlayer));
+                    }
+                    //going Left by 1 AND Up by 1
+                    if (((!boardStatus[playerStatus[p].x, playerStatus[p].y - 1].hasRightWall && //going left then up
+                            boardStatus[playerStatus[p].x, playerStatus[p].y - 2].hasRightWall &&
+                            !boardStatus[playerStatus[p].x, playerStatus[p].y - 1].isOpen)
+                            ||
+                            (!boardStatus[playerStatus[p].x - 1, playerStatus[p].y].hasBotWall && //going up then left
+                                boardStatus[playerStatus[p].x - 2, playerStatus[p].y].hasBotWall &&
+                                !boardStatus[playerStatus[p].x - 1, playerStatus[p].y].isOpen)))
+                    {
+                        newBoard = new Board(node.State);
+                        newBoard.MoveLeft(p, 1, true);
+                        node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveLeft, p, 1, true), nextPlayer));
+                    }
+                }
 
-            //TODO: Generate all legal children of this Node
+                //Move Left
+                if (!boardStatus[playerStatus[p].x, playerStatus[p].y - 1].hasRightWall)
+                {
+                    newBoard = new Board(node.State);
+                    newBoard.MoveLeft(p, 1);
+                    node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveLeft, p, 1), nextPlayer));
+                }
+                // going Left jumping over 1 player directly
+                else if (!boardStatus[playerStatus[p].x, playerStatus[p].y - 1].hasRightWall &&
+                 !boardStatus[playerStatus[p].x, playerStatus[p].y - 1].isOpen &&
+                 !boardStatus[playerStatus[p].x, playerStatus[p].y - 2].hasRightWall)
+                {
+                    newBoard = new Board(node.State);
+                    newBoard.MoveLeft(p, 2);
+                    node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveLeft, p, 2), nextPlayer));
+                }
 
+                //Move Right
+                if (!boardStatus[playerStatus[p].x, playerStatus[p].y].hasRightWall)
+                {
+                    newBoard = new Board(node.State);
+                    newBoard.MoveRight(p, 1);
+                    node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveRight, p, 1), nextPlayer));
+                }
+                else if (!boardStatus[playerStatus[p].x, playerStatus[p].y].hasRightWall &&
+                 !boardStatus[playerStatus[p].x, playerStatus[p].y + 1].isOpen &&
+                 !boardStatus[playerStatus[p].x, playerStatus[p].y + 1].hasRightWall)
+                {
+                    newBoard = new Board(node.State);
+                    newBoard.MoveRight(p, 2);
+                    node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveRight, p, 2), nextPlayer));
+                }
 
+                //Move Down
+                // going down by 1 (checks on location and for walls)
+                if (!boardStatus[playerStatus[p].x, playerStatus[p].y].hasBotWall)
+                {
+                    newBoard = new Board(node.State);
+                    newBoard.MoveDown(p, 1);
+                    node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveDown, p, 1), nextPlayer));
+                }
+                else
+                {
+                    // going down jumping over 1 player directly
+                    if (!boardStatus[playerStatus[p].x, playerStatus[p].y].hasBotWall &&
+                        !boardStatus[playerStatus[p].x + 1, playerStatus[p].y].isOpen &&
+                        !boardStatus[playerStatus[p].x + 1, playerStatus[p].y].hasBotWall)
+                    {
+                        newBoard = new Board(node.State);
+                        newBoard.MoveDown(p, 2);
+                        node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveDown, p, 2), nextPlayer));
+                    }
+                    // going Down by 1 AND to the Left by 1
+                    if (
+                        ((!boardStatus[playerStatus[p].x, playerStatus[p].y].hasBotWall && //going down then left
+                            boardStatus[playerStatus[p].x + 1, playerStatus[p].y].hasBotWall &&
+                            !boardStatus[playerStatus[p].x + 1, playerStatus[p].y].isOpen)
+                            ||
+                            (!boardStatus[playerStatus[p].x, playerStatus[p].y - 1].hasRightWall && //going left then down
+                                boardStatus[playerStatus[p].x, playerStatus[p].y - 2].hasRightWall &&
+                                !boardStatus[playerStatus[p].x, playerStatus[p].y - 1].isOpen)))
+                    {
+                        newBoard = new Board(node.State);
+                        newBoard.MoveDown(p, 1, true);
+                        node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveDown, p, 1, true), nextPlayer));
+                    }
+                    // going Right by 1 AND Down by 1
+                    if (
+                     ((!boardStatus[playerStatus[p].x, playerStatus[p].y].hasRightWall && //going Right then Down
+                        boardStatus[playerStatus[p].x, playerStatus[p].y + 1].hasRightWall &&
+                       !boardStatus[playerStatus[p].x, playerStatus[p].y + 1].isOpen)
+                       ||
+                      (!boardStatus[playerStatus[p].x, playerStatus[p].y].hasBotWall && //going Down then Right
+                        boardStatus[playerStatus[p].x + 1, playerStatus[p].y].hasBotWall &&
+                       !boardStatus[playerStatus[p].x + 1, playerStatus[p].y].isOpen)))
+                    {
+                        newBoard = new Board(node.State);
+                        newBoard.MoveRight(p, 1, true);
+                        node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveRight, p, 1, true), nextPlayer));
+                    }
+                }
+            }
+#endregion
+            #region Player 2's Successors
+            //Player 2 prioritizes moving down -> left or right -> Wall -> Up (tentative Move Ordering)
+            //Move Down
+            // going down by 1 (checks on location and for walls)
+            if (!boardStatus[playerStatus[p].x, playerStatus[p].y].hasBotWall)
+            {
+                newBoard = new Board(node.State);
+                newBoard.MoveDown(p, 1);
+                node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveDown, p, 1), nextPlayer));
+            }
+            else
+            {
+                // going down jumping over 1 player directly
+                if (!boardStatus[playerStatus[p].x, playerStatus[p].y].hasBotWall &&
+                    !boardStatus[playerStatus[p].x + 1, playerStatus[p].y].isOpen &&
+                    !boardStatus[playerStatus[p].x + 1, playerStatus[p].y].hasBotWall)
+                {
+                    newBoard = new Board(node.State);
+                    newBoard.MoveDown(p, 2);
+                    node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveDown, p, 2), nextPlayer));
+                }
+                // going Down by 1 AND to the Left by 1
+                if (
+                    ((!boardStatus[playerStatus[p].x, playerStatus[p].y].hasBotWall && //going down then left
+                        boardStatus[playerStatus[p].x + 1, playerStatus[p].y].hasBotWall &&
+                        !boardStatus[playerStatus[p].x + 1, playerStatus[p].y].isOpen)
+                        ||
+                        (!boardStatus[playerStatus[p].x, playerStatus[p].y - 1].hasRightWall && //going left then down
+                            boardStatus[playerStatus[p].x, playerStatus[p].y - 2].hasRightWall &&
+                            !boardStatus[playerStatus[p].x, playerStatus[p].y - 1].isOpen)))
+                {
+                    newBoard = new Board(node.State);
+                    newBoard.MoveDown(p, 1, true);
+                    node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveDown, p, 1, true), nextPlayer));
+                }
+                // going Right by 1 AND Down by 1
+                if (
+                 ((!boardStatus[playerStatus[p].x, playerStatus[p].y].hasRightWall && //going Right then Down
+                    boardStatus[playerStatus[p].x, playerStatus[p].y + 1].hasRightWall &&
+                   !boardStatus[playerStatus[p].x, playerStatus[p].y + 1].isOpen)
+                   ||
+                  (!boardStatus[playerStatus[p].x, playerStatus[p].y].hasBotWall && //going Down then Right
+                    boardStatus[playerStatus[p].x + 1, playerStatus[p].y].hasBotWall &&
+                   !boardStatus[playerStatus[p].x + 1, playerStatus[p].y].isOpen)))
+                {
+                    newBoard = new Board(node.State);
+                    newBoard.MoveRight(p, 1, true);
+                    node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveRight, p, 1, true), nextPlayer));
+                }
+            }
+            
 
+            //Move Left
+            if (!boardStatus[playerStatus[p].x, playerStatus[p].y - 1].hasRightWall)
+            {
+                newBoard = new Board(node.State);
+                newBoard.MoveLeft(p, 1);
+                node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveLeft, p, 1), nextPlayer));
+            }
+            // going Left jumping over 1 player directly
+            else if (!boardStatus[playerStatus[p].x, playerStatus[p].y - 1].hasRightWall &&
+             !boardStatus[playerStatus[p].x, playerStatus[p].y - 1].isOpen &&
+             !boardStatus[playerStatus[p].x, playerStatus[p].y - 2].hasRightWall)
+            {
+                newBoard = new Board(node.State);
+                newBoard.MoveLeft(p, 2);
+                node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveLeft, p, 2), nextPlayer));
+            }
 
-            return;
+            //Move Right
+            if (!boardStatus[playerStatus[p].x, playerStatus[p].y].hasRightWall)
+            {
+                newBoard = new Board(node.State);
+                newBoard.MoveRight(p, 1);
+                node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveRight, p, 1), nextPlayer));
+            }
+            else if (!boardStatus[playerStatus[p].x, playerStatus[p].y].hasRightWall &&
+             !boardStatus[playerStatus[p].x, playerStatus[p].y + 1].isOpen &&
+             !boardStatus[playerStatus[p].x, playerStatus[p].y + 1].hasRightWall)
+            {
+                newBoard = new Board(node.State);
+                newBoard.MoveRight(p, 2);
+                node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveRight, p, 2), nextPlayer));
+            }
+
+            //Move up
+            if (!boardStatus[playerStatus[p].x - 1, playerStatus[p].y].hasBotWall)
+            {
+                newBoard.MoveUp(p, 1);
+                node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveUp, p, 1), nextPlayer));
+            }
+            else
+            {
+                // going up jumping over 1 player directly
+                if (!boardStatus[playerStatus[p].x - 1, playerStatus[p].y].hasBotWall &&
+                 !boardStatus[playerStatus[p].x - 1, playerStatus[p].y].isOpen &&
+                 !boardStatus[playerStatus[p].x - 2, playerStatus[p].y].hasBotWall)
+                {
+                    newBoard = new Board(node.State);
+                    newBoard.MoveUp(p, 2);
+                    node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveUp, p, 2), nextPlayer));
+                }
+                // going Up by 1 and Right by 1
+                if (((!boardStatus[playerStatus[p].x - 1, playerStatus[p].y].hasBotWall && //going up then Right
+                       boardStatus[playerStatus[p].x - 2, playerStatus[p].y].hasBotWall &&
+                      !boardStatus[playerStatus[p].x - 1, playerStatus[p].y].isOpen)
+                      ||
+                     (!boardStatus[playerStatus[p].x, playerStatus[p].y].hasRightWall && //going Right then Up
+                       boardStatus[playerStatus[p].x, playerStatus[p].y + 1].hasRightWall &&
+                      !boardStatus[playerStatus[p].x, playerStatus[p].y + 1].isOpen)))
+                {
+                    newBoard = new Board(node.State);
+                    newBoard.MoveUp(p, 1, true);
+                    node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveUp, p, 1, true), nextPlayer));
+                }
+                //going Left by 1 AND Up by 1
+                if (((!boardStatus[playerStatus[p].x, playerStatus[p].y - 1].hasRightWall && //going left then up
+                        boardStatus[playerStatus[p].x, playerStatus[p].y - 2].hasRightWall &&
+                        !boardStatus[playerStatus[p].x, playerStatus[p].y - 1].isOpen)
+                        ||
+                        (!boardStatus[playerStatus[p].x - 1, playerStatus[p].y].hasBotWall && //going up then left
+                            boardStatus[playerStatus[p].x - 2, playerStatus[p].y].hasBotWall &&
+                            !boardStatus[playerStatus[p].x - 1, playerStatus[p].y].isOpen)))
+                {
+                    newBoard = new Board(node.State);
+                    newBoard.MoveLeft(p, 1, true);
+                    node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveLeft, p, 1, true), nextPlayer));
+                }
+            }
+            #endregion
+
+            #region Wall Generation (for both players)
+            for (int x = 0; x < Board.BOARD_SIZE - 1; x++)
+            {
+                for (int y = 0; y < Board.BOARD_SIZE - 1; y++)
+                {
+                    //Horizontal Wall
+                    if (playerStatus[p].wallsLeft > 0 && node.State.CheckWallH(x, y))
+                    {
+                        newBoard = new Board(node.State);
+                        newBoard.PlaceWallH(x, y);
+                        newBoard.playerStatus[p].wallsLeft--;
+                        node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.PlaceWallH, x, y, true), nextPlayer));
+                    }
+
+                    //Vertical Wall
+                    if (playerStatus[p].wallsLeft > 0 && node.State.CheckWallV(x, y))
+                    {
+                        newBoard = new Board(node.State);
+                        newBoard.PlaceWallV(x, y);
+                        newBoard.playerStatus[p].wallsLeft--;
+                        node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.PlaceWallV, x, y, false), nextPlayer));
+                    }
+
+                }
+            }
+            #endregion
         }
     }
 }

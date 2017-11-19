@@ -4,14 +4,22 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-namespace Assets
+namespace Assets.Scripts
 {
-    class Board
+    public class Board
     {
-        const int MAX_PLAYERS = 4;
-        const int MIN_PLAYERS = 2;
-        const int BOARD_SIZE = 9;
-        const int TOTAL_WALLS = 20;
+        public delegate bool Action(int player_wallXPos, int movement_wallYPos, bool jump_isHorizontal);
+
+        public bool ExecuteFunction(Scripts.ActionFunction actionFunction)
+        {
+            Action action = actionFunction.function;
+            return action.Invoke(actionFunction.param1, actionFunction.param2, actionFunction.param3);
+        }
+
+        public const int MAX_PLAYERS = 4;
+        public const int MIN_PLAYERS = 2;
+        public const int BOARD_SIZE = 9;
+        public const int TOTAL_WALLS = 20;
 
         int _numPlayers;
 
@@ -33,7 +41,25 @@ namespace Assets
             playerStatus = new PlayerInfo[numPlayers];
         }
 
-
+        public Board(Board other) : this (other._numPlayers)
+        {
+            accessible = (int[,]) other.accessible.Clone();
+            for (int i = 0; i < _numPlayers; i++)
+            {
+                playerStatus[i] = new PlayerInfo(other.playerStatus[i]);
+            }
+            for (int i = 0; i < BOARD_SIZE; i++)
+            {
+                for (int j = 0; j < BOARD_SIZE; j++)
+                {
+                    if (i < BOARD_SIZE -1 && j < BOARD_SIZE - 1)
+                    {
+                        wallPegStatus[i, j] = new WallPeg(other.wallPegStatus[i, j]);
+                    }
+                    boardStatus[i, j] = new gameSquareInfo(other.boardStatus[i, j]);
+                }
+            }
+        }
         public void GetAccessible(int x, int y, int num, int direction)
         {
             if (accessible[x, y] > num)
@@ -188,7 +214,7 @@ namespace Assets
         #region Functions representing player's decision(moving or placing wall)
         //if turn jumping is false it will move either 1 space or 2(jumping directly)
         //if turn jumping is true it will move down and left
-        public void MoveDown(int p, int movement, bool turnjumping = false)
+        public bool MoveDown(int p, int movement, bool turnjumping = false)
         {
             if (!turnjumping)
             {
@@ -205,11 +231,12 @@ namespace Assets
                 playerStatus[p].x += movement;
                 playerStatus[p].y -= movement;
             }
+            return false;
         }
 
         //if turn jumping is false it will move either 1 space or 2(jumping directly)
         //if turn jumping is true it will move up and right
-        public void MoveUp(int p, int movement, bool turnjumping = false)
+        public bool MoveUp(int p, int movement, bool turnjumping = false)
         {
             if (!turnjumping)
             {
@@ -226,11 +253,12 @@ namespace Assets
                 playerStatus[p].x -= movement;
                 playerStatus[p].y += movement;
             }
+            return false;
         }
 
         //if turn jumping is false it will move either 1 space or 2(jumping directly)
         //if turn jumping is true it will move left and up
-        public void MoveLeft(int p, int movement, bool turnjumping = false)
+        public bool MoveLeft(int p, int movement, bool turnjumping = false)
         {
             if (!turnjumping)
             {
@@ -247,11 +275,12 @@ namespace Assets
                 playerStatus[p].x -= movement;
                 playerStatus[p].y -= movement;
             }
+            return false;
         }
 
         //if turn jumping is false it will move either 1 space or 2(jumping directly)
         //if turn jumping is true it will move right and down
-        public void MoveRight(int p, int movement, bool turnjumping = false)
+        public bool MoveRight(int p, int movement, bool turnjumping = false)
         {
             if (!turnjumping)
             {
@@ -268,10 +297,26 @@ namespace Assets
                 playerStatus[p].x += movement;
                 playerStatus[p].y += movement;
             }
+            return false;
         }
 
+        public bool PlaceWallH(int xPos, int yPos, bool dummy = false)
+        {
+            wallPegStatus[xPos, yPos].isOpen = false;
+            boardStatus[xPos, yPos].hasBotWall = true;
+            boardStatus[xPos, yPos + 1].hasBotWall = true;
+            return true;
+        }
+
+        public bool PlaceWallV(int xPos, int yPos, bool dummy = false)
+        {
+            wallPegStatus[xPos, yPos].isOpen = false;
+            boardStatus[xPos, yPos].hasRightWall = true;
+            boardStatus[xPos + 1, yPos].hasRightWall = true;
+            return true;
+        }
         #endregion
-        
+
         #region Functions checking if accessible (i.e not blocked by a wall)
         //used for checking if Accessible for winning (NOT USED FOR ACTUAL PLAYER MOVING)
         bool CanMoveDown(int posX, int posY) //test

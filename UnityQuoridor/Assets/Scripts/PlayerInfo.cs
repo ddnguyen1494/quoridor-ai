@@ -8,6 +8,18 @@ public class PlayerInfo : MonoBehaviour {
 	public GameObject body;
 	public Vector3 spawnPoint;
 
+    public PlayerInfo(PlayerInfo other)
+    {
+        x = other.x;
+        y = other.y;
+        goalX = other.goalX;
+        goalY = other.goalY;
+        wallsLeft = other.wallsLeft;
+        id = other.id;
+        currentTurn = other.currentTurn;
+        isAi = other.isAi;
+    }
+
 	public int x;
 	public int y;
 	public int goalX;

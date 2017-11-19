@@ -3,67 +3,81 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Collections;
+
 namespace Assets.Scripts
 {
+    internal struct ValueAndAction
+    {
+        public ValueAndAction(int val, ActionFunction act)
+        {
+            value = val;
+            action = act;
+        }
+        public int value;
+        public ActionFunction action;
+    }
+
+
     class AlphaBeta
     {
-        private static Node MaxValue(Node node, ref int alpha, ref int beta, int depth)
+        private static ValueAndAction MaxValue(Node node, ref int alpha, ref int beta, int depth)
         {
-            if (Agent.CutOff(node, depth))
+            if (Agent.CutOff(node.State, depth))
             {
-                node.Value = Agent.Evaluate(node.State);
-                return node;
-            }
-            int tempVal = int.MinValue;
-            BitArray tempState = null;
-            Agent.GenerateSuccessors(node);
-            foreach(Node child in node.Children)
-            {
-                var retNode = MinValue(child, ref alpha, ref beta, depth + 1);
-                if(retNode.Value > tempVal)
-                {
-                    tempVal = retNode.Value;
-                    tempState = retNode.State;
-                    if (retNode.Value >= beta)
-                        return retNode;
-                    alpha = Math.Max(alpha, retNode.Value);
-                }
-            }
-            return new Node(tempState, tempVal);
-
-        }
-
-        private static Node MinValue(Node node, ref int alpha, ref int beta, int depth)
-        {
-            if (Agent.CutOff(node, depth))
-            {
-                node.Value = Agent.Evaluate(node.State);
-                return node;
+                node.Value = Agent.Evaluate(node);
+                return new ValueAndAction(node.Value, node.Action);
             }
             int tempVal = int.MaxValue;
-            BitArray tempState = null;
-            Agent.GenerateSuccessors(node);
+            ActionFunction tempAction = new ActionFunction();
+            if (node.Children.Count == 0) //Only generate successors if haven't done so
+                Agent.GenerateSuccessors(node);
             foreach (Node child in node.Children)
             {
-                var retNode = MaxValue(child, ref alpha, ref beta, depth + 1);
-                if (retNode.Value < tempVal)
+                var retValAction = MinValue(child, ref alpha, ref beta, depth + 1);
+                if(retValAction.value > tempVal)
                 {
-                    tempVal = retNode.Value;
-                    tempState = retNode.State;
-                    if (retNode.Value <= alpha)
-                        return retNode;
-                    beta = Math.Min(beta, retNode.Value);
+                    tempVal = retValAction.value;
+                    tempAction = retValAction.action;
+                    if (retValAction.value >= beta)
+                        return retValAction;
+                    alpha = Math.Max(alpha, retValAction.value);
                 }
             }
-            return new Node(tempState, tempVal);
+            return new ValueAndAction(tempVal, tempAction);
+
         }
 
-        public static BitArray Search(Node node)
+        private static ValueAndAction MinValue(Node node, ref int alpha, ref int beta, int depth)
+        {
+            if (Agent.CutOff(node.State, depth))
+            {
+                node.Value = Agent.Evaluate(node);
+                return new ValueAndAction(node.Value, node.Action);
+            }
+            int tempVal = int.MaxValue;
+            ActionFunction tempAction = new ActionFunction();
+            if (node.Children.Count == 0) //Only generate successors if haven't done so
+                Agent.GenerateSuccessors(node);
+            foreach (Node child in node.Children)
+            {
+                var retValAction = MaxValue(child, ref alpha, ref beta, depth + 1);
+                if (retValAction.value < tempVal)
+                {
+                    tempVal = retValAction.value;
+                    tempAction = retValAction.action;
+                    if (retValAction.value <= alpha)
+                        return retValAction;
+                    beta = Math.Min(beta, retValAction.value);
+                }
+            }
+            return new ValueAndAction(tempVal, tempAction);
+        }
+
+        public static ActionFunction Search(Node root)
         {
             int alpha = int.MinValue;
             int beta = int.MaxValue;
-            Node nextNode = MinValue(node, ref alpha, ref beta, 0);
-            return nextNode.State;
+            return MinValue(root, ref alpha, ref beta, 0).action;
         }
     }
 }

@@ -4,11 +4,14 @@ using UnityEngine;
 
 public class gameSquareInfo : MonoBehaviour {
 
-	//public BoxCollider botCollider;
-	//public BoxCollider rightCollider;
-
-	//public GameObject wallH;
-	//public GameObject wallV;
+    public gameSquareInfo(gameSquareInfo other)
+    {
+        hasBotWall = other.hasBotWall;
+        hasRightWall = other.hasRightWall;
+        isOpen = other.isOpen;
+        x = other.x;
+        y = other.y;
+    }
 
 	public bool hasBotWall = false;
 	public bool hasRightWall = false;
