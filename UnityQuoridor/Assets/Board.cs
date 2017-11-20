@@ -8,12 +8,12 @@ namespace Assets.Scripts
 {
     public class Board
     {
-        public delegate bool Action(int player_wallXPos, int movement_wallYPos, bool jump_isHorizontal);
+        public delegate bool Action(int player_wallXPos, int movement_wallYPos, int direction_dummy, bool jump_isHorizontal);
 
         public bool ExecuteFunction(Scripts.ActionFunction actionFunction)
         {
             Action action = actionFunction.function;
-            return action.Invoke(actionFunction.param1, actionFunction.param2, actionFunction.param3);
+            return action.Invoke(actionFunction.param1, actionFunction.param2, actionFunction.param3, actionFunction.param4);
         }
 
         public const int MAX_PLAYERS = 4;
@@ -214,18 +214,18 @@ namespace Assets.Scripts
         #region Functions representing player's decision(moving or placing wall)
         //if turn jumping is false it will move either 1 space or 2(jumping directly)
         //if turn jumping is true it will move down and left
-        public bool MoveDown(int p, int movement, bool turnjumping = false)
+        public bool MoveDown(int p, int movement, int direction, bool turnjumping = false)
         {
             if (!turnjumping)
             {
-                playerStatus[p].transform.position = boardStatus[playerStatus[p].x + movement, playerStatus[p].y].transform.position + new Vector3(0, 0, -1f);
+                //playerStatus[p].transform.position = boardStatus[playerStatus[p].x + movement, playerStatus[p].y].transform.position + new Vector3(0, 0, -1f);
                 boardStatus[playerStatus[p].x, playerStatus[p].y].isOpen = true;
                 boardStatus[playerStatus[p].x + movement, playerStatus[p].y].isOpen = false;
                 playerStatus[p].x += movement;
             }
             else
             {
-                playerStatus[p].transform.position = boardStatus[playerStatus[p].x + movement, playerStatus[p].y - movement].transform.position + new Vector3(0, 0, -1f);
+                //playerStatus[p].transform.position = boardStatus[playerStatus[p].x + movement, playerStatus[p].y - movement].transform.position + new Vector3(0, 0, -1f);
                 boardStatus[playerStatus[p].x, playerStatus[p].y].isOpen = true;
                 boardStatus[playerStatus[p].x + movement, playerStatus[p].y - movement].isOpen = false;
                 playerStatus[p].x += movement;
@@ -236,18 +236,18 @@ namespace Assets.Scripts
 
         //if turn jumping is false it will move either 1 space or 2(jumping directly)
         //if turn jumping is true it will move up and right
-        public bool MoveUp(int p, int movement, bool turnjumping = false)
+        public bool MoveUp(int p, int movement, int direction, bool turnjumping = false)
         {
             if (!turnjumping)
             {
-                playerStatus[p].transform.position = boardStatus[playerStatus[p].x - movement, playerStatus[p].y].transform.position + new Vector3(0, 0, -1f);
+                //playerStatus[p].transform.position = boardStatus[playerStatus[p].x - movement, playerStatus[p].y].transform.position + new Vector3(0, 0, -1f);
                 boardStatus[playerStatus[p].x, playerStatus[p].y].isOpen = true;
                 boardStatus[playerStatus[p].x - movement, playerStatus[p].y].isOpen = false;
                 playerStatus[p].x -= movement;
             }
             else
             {
-                playerStatus[p].transform.position = boardStatus[playerStatus[p].x - movement, playerStatus[p].y + movement].transform.position + new Vector3(0, 0, -1f);
+                //playerStatus[p].transform.position = boardStatus[playerStatus[p].x - movement, playerStatus[p].y + movement].transform.position + new Vector3(0, 0, -1f);
                 boardStatus[playerStatus[p].x, playerStatus[p].y].isOpen = true;
                 boardStatus[playerStatus[p].x - movement, playerStatus[p].y + movement].isOpen = false;
                 playerStatus[p].x -= movement;
@@ -258,18 +258,18 @@ namespace Assets.Scripts
 
         //if turn jumping is false it will move either 1 space or 2(jumping directly)
         //if turn jumping is true it will move left and up
-        public bool MoveLeft(int p, int movement, bool turnjumping = false)
+        public bool MoveLeft(int p, int movement, int direction, bool turnjumping = false)
         {
             if (!turnjumping)
             {
-                playerStatus[p].transform.position = boardStatus[playerStatus[p].x, playerStatus[p].y - movement].transform.position + new Vector3(0, 0, -1f);
+                //playerStatus[p].transform.position = boardStatus[playerStatus[p].x, playerStatus[p].y - movement].transform.position + new Vector3(0, 0, -1f);
                 boardStatus[playerStatus[p].x, playerStatus[p].y].isOpen = true;
                 boardStatus[playerStatus[p].x, playerStatus[p].y - movement].isOpen = false;
                 playerStatus[p].y -= movement;
             }
             else
             {
-                playerStatus[p].transform.position = boardStatus[playerStatus[p].x - movement, playerStatus[p].y - movement].transform.position + new Vector3(0, 0, -1f);
+                //playerStatus[p].transform.position = boardStatus[playerStatus[p].x - movement, playerStatus[p].y - movement].transform.position + new Vector3(0, 0, -1f);
                 boardStatus[playerStatus[p].x, playerStatus[p].y].isOpen = true;
                 boardStatus[playerStatus[p].x - movement, playerStatus[p].y - movement].isOpen = false;
                 playerStatus[p].x -= movement;
@@ -280,18 +280,18 @@ namespace Assets.Scripts
 
         //if turn jumping is false it will move either 1 space or 2(jumping directly)
         //if turn jumping is true it will move right and down
-        public bool MoveRight(int p, int movement, bool turnjumping = false)
+        public bool MoveRight(int p, int movement, int direction, bool turnjumping = false)
         {
             if (!turnjumping)
             {
-                playerStatus[p].transform.position = boardStatus[playerStatus[p].x, playerStatus[p].y + movement].transform.position + new Vector3(0, 0, -1f);
+                //playerStatus[p].transform.position = boardStatus[playerStatus[p].x, playerStatus[p].y + movement].transform.position + new Vector3(0, 0, -1f);
                 boardStatus[playerStatus[p].x, playerStatus[p].y].isOpen = true;
                 boardStatus[playerStatus[p].x, playerStatus[p].y + movement].isOpen = false;
                 playerStatus[p].y += movement;
             }
             else
             {
-                playerStatus[p].transform.position = boardStatus[playerStatus[p].x + movement, playerStatus[p].y + movement].transform.position + new Vector3(0, 0, -1f);
+                //playerStatus[p].transform.position = boardStatus[playerStatus[p].x + movement, playerStatus[p].y + movement].transform.position + new Vector3(0, 0, -1f);
                 boardStatus[playerStatus[p].x, playerStatus[p].y].isOpen = true;
                 boardStatus[playerStatus[p].x + movement, playerStatus[p].y + movement].isOpen = false;
                 playerStatus[p].x += movement;
@@ -300,7 +300,7 @@ namespace Assets.Scripts
             return false;
         }
 
-        public bool PlaceWallH(int xPos, int yPos, bool dummy = false)
+        public bool PlaceWallH(int xPos, int yPos, int dummy = -1, bool isHorizontal = true)
         {
             wallPegStatus[xPos, yPos].isOpen = false;
             boardStatus[xPos, yPos].hasBotWall = true;
@@ -308,7 +308,7 @@ namespace Assets.Scripts
             return true;
         }
 
-        public bool PlaceWallV(int xPos, int yPos, bool dummy = false)
+        public bool PlaceWallV(int xPos, int yPos, int dummy = -1, bool isHorizontal = false)
         {
             wallPegStatus[xPos, yPos].isOpen = false;
             boardStatus[xPos, yPos].hasRightWall = true;

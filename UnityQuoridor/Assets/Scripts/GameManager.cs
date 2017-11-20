@@ -151,11 +151,11 @@ public class GameManager : MonoBehaviour {
 			playerStatus[1].goalX = 8;
 			playerStatus[1].goalY = -1;
 			boardStatus[0, 4].isOpen = false;
-            //if (MainMenu.playerSettings == 1) // If PvE was selected make 2nd player a Bot
-            //{
+            if (MainMenu.playerSettings == 1) // If PvE was selected make 2nd player a Bot
+            {
                 playerStatus[1].isAi = true;
                 MyAgent = new Assets.Scripts.Agent();
-            //}
+            }
 
         }
 		// For 4 players set up start information this way
@@ -220,7 +220,7 @@ public class GameManager : MonoBehaviour {
 				yield return StartCoroutine (PlayersTurn (turnOrder)); // Human Players Turn
 			else
 				yield return StartCoroutine (AITurn (turnOrder)); // AI Players Turn
-					Debug.Log("Player "+ (turnOrder+1) + "'s turn has ended.");
+			Debug.Log("Player "+ (turnOrder+1) + "'s turn has ended.");
 			// Check to see if player has won
 			if (playerStatus[turnOrder].CheckWin())
 			{
@@ -242,19 +242,40 @@ public class GameManager : MonoBehaviour {
 		playerStatus [playerNum].currentTurn = true;
 		playersTurnText.text = "Player " + (playerNum+1) + "'s Turn!";
         Assets.Scripts.ActionFunction action = MyAgent.NextMove(Board);
-        if (!Board.ExecuteFunction(action)) //Moving Pawn
-            yield return null;
-        if (action.param3 == true) // Horizontal Wall
-            PlaceWallH(action.param1, action.param2, action.param3);
-        else
-            PlaceWallH(action.param1, action.param2, action.param3);
-        yield return null;
+        if (action.function == null)
+            Debug.LogError("Agent action is null. Something is wrong");
+        
+        switch (action.param3)
+        {
+            case -1:
+                if (action.param4 == true) // Horizontal Wall
+                    PlaceWallH(action.param1, action.param2);
+                else
+                    PlaceWallH(action.param1, action.param2);
+                break;
+            case 0:
+                MoveRight(action.param1, action.param2, action.param4);
+                break;
+            case 1:
+                MoveUp(action.param1, action.param2, action.param4);
+                break;
+            case 2:
+                MoveLeft(action.param1, action.param2, action.param4);
+                break;
+            case 3:
+                MoveDown(action.param1, action.param2, action.param4);
+                break;
+        }
+        
+        Board.ExecuteFunction(action);
+        playerStatus[playerNum].currentTurn = false;
+        return null;
         //yield return m_StartWait; // wait a second so Ai turn doesn't seem instant.
         //while (playerStatus [playerNum].currentTurn) {
         //	// Decide whether to Place wall or Move, then execute the placement or movement.
         ////temp Moving for testing:
         //	Board.MoveDown (playerNum, 1);
-        //	playerStatus [playerNum].currentTurn = false;
+        //	
         ////temp Moving End [Remove above statements up to start of testing]
 
 
@@ -302,7 +323,8 @@ public class GameManager : MonoBehaviour {
 							// going down by 1 (checks on location and for walls)
 							if (xDiff == 1 && yDiff == 0 &&
 								!boardStatus [playerStatus [p].x, playerStatus [p].y].hasBotWall) {
-								Board.MoveDown (p, 1);
+                                MoveDown(p, 1);
+								Board.MoveDown (p, 1, -1);
 								playerStatus [p].currentTurn = false;
 							}
 							// going down jumping over 1 player directly
@@ -310,8 +332,9 @@ public class GameManager : MonoBehaviour {
 								!boardStatus [playerStatus [p].x, playerStatus [p].y].hasBotWall &&
 								!boardStatus [playerStatus [p].x+1, playerStatus [p].y].isOpen &&
 								!boardStatus [playerStatus [p].x+1, playerStatus [p].y].hasBotWall) {
-								Board.MoveDown (p, 2);
-								playerStatus [p].currentTurn = false;
+                                MoveDown(p, 2);
+								Board.MoveDown (p, 2, -1);
+                                playerStatus [p].currentTurn = false;
 							}
 							// going Down by 1 AND to the Left by 1
 							else if(xDiff == 1 && yDiff == -1 &&
@@ -322,24 +345,27 @@ public class GameManager : MonoBehaviour {
 									(!boardStatus [playerStatus [p].x, playerStatus [p].y-1].hasRightWall && //going left then down
 										boardStatus [playerStatus [p].x, playerStatus [p].y-2].hasRightWall &&
 										!boardStatus [playerStatus [p].x, playerStatus [p].y-1].isOpen)) ){
-								Board.MoveDown (p,1,true);
-								playerStatus [p].currentTurn = false;
+                                MoveDown(p, 1, true);
+								Board.MoveDown (p, 1, -1, true);
+                                playerStatus [p].currentTurn = false;
 							}
 
 						// UP-----------------------------------------------------------------------
 							// going up by 1 (checks on location and for walls)
 							else if (xDiff == -1 && yDiff == 0 &&
 							 !boardStatus [playerStatus [p].x-1, playerStatus [p].y].hasBotWall) {
-								Board.MoveUp (p, 1);
-								playerStatus [p].currentTurn = false;
+                                MoveUp(p, 1);
+								Board.MoveUp (p, 1, -1);
+                                playerStatus [p].currentTurn = false;
 							}
 							// going up jumping over 1 player directly
 							else if (xDiff == -2 && yDiff == 0 &&
 							 !boardStatus [playerStatus [p].x-1, playerStatus [p].y].hasBotWall &&
 							 !boardStatus [playerStatus [p].x-1, playerStatus [p].y].isOpen &&
 							 !boardStatus [playerStatus [p].x-2, playerStatus [p].y].hasBotWall) {
-								Board.MoveUp (p, 2);
-								playerStatus [p].currentTurn = false;
+                                MoveUp(p, 2);
+								Board.MoveUp (p, 2, -1);
+                                playerStatus [p].currentTurn = false;
 							}
 							// going Up by 1 AND Right by 1
 							else if(xDiff == -1 && yDiff == 1 &&
@@ -350,8 +376,9 @@ public class GameManager : MonoBehaviour {
 								 (!boardStatus [playerStatus [p].x, playerStatus [p].y].hasRightWall && //going Right then Up
 								   boardStatus [playerStatus [p].x, playerStatus [p].y+1].hasRightWall &&
 								  !boardStatus [playerStatus [p].x, playerStatus [p].y+1].isOpen))  ){
-								Board.MoveUp (p, 1, true);
-								playerStatus [p].currentTurn = false;
+                                MoveUp(p, 1, true);
+								Board.MoveUp (p, 1, -1, true);
+                                playerStatus [p].currentTurn = false;
 
 							}
 
@@ -359,16 +386,18 @@ public class GameManager : MonoBehaviour {
 							// going Left by 1 (checks on location and for walls)
 							else if(xDiff == 0 && yDiff == -1 &&
 							 !boardStatus [playerStatus [p].x, playerStatus [p].y-1].hasRightWall) {
-								Board.MoveLeft (p,1);
-								playerStatus [p].currentTurn = false;
+                                MoveLeft(p, 1);
+								Board.MoveLeft (p, 1, -1);
+                                playerStatus [p].currentTurn = false;
 							}
 							// going Left jumping over 1 player directly
 							else if(xDiff == 0 && yDiff == -2 &&
 							 !boardStatus [playerStatus [p].x, playerStatus [p].y-1].hasRightWall &&
 							 !boardStatus [playerStatus [p].x, playerStatus [p].y-1].isOpen &&
 							 !boardStatus [playerStatus [p].x, playerStatus [p].y-2].hasRightWall) {
-								Board.MoveLeft (p,2);
-								playerStatus [p].currentTurn = false;
+                                MoveLeft(p, 2);
+								Board.MoveLeft (p,2, -1);
+                                playerStatus [p].currentTurn = false;
 							}
 							//going Left by 1 AND Up by 1
 							else if(xDiff == -1 && yDiff == -1 &&
@@ -379,8 +408,9 @@ public class GameManager : MonoBehaviour {
 									(!boardStatus [playerStatus [p].x-1, playerStatus [p].y].hasBotWall && //going up then left
 										boardStatus [playerStatus [p].x-2, playerStatus [p].y].hasBotWall &&
 										!boardStatus [playerStatus [p].x-1, playerStatus [p].y].isOpen))  ){
-								Board.MoveLeft (p, 1, true);
-								playerStatus [p].currentTurn = false;
+                                MoveLeft(p, 1, true);
+								Board.MoveLeft (p, 1, -1, true);
+                                playerStatus [p].currentTurn = false;
 
 							}
 
@@ -388,15 +418,17 @@ public class GameManager : MonoBehaviour {
 							// going Right by 1 (checks on location and for walls)
 							else if(xDiff == 0 && yDiff == 1 &&
 							 !boardStatus [playerStatus [p].x, playerStatus [p].y].hasRightWall) {
-								Board.MoveRight (p,1);
-								playerStatus [p].currentTurn = false;
+                                MoveRight(p, 1);
+								Board.MoveRight (p, 1, -1);
+                                playerStatus [p].currentTurn = false;
 							}
 							else if(xDiff == 0 && yDiff == 2 &&
 							 !boardStatus [playerStatus [p].x, playerStatus [p].y].hasRightWall &&
 							 !boardStatus [playerStatus [p].x, playerStatus [p].y+1].isOpen &&
 							 !boardStatus [playerStatus [p].x, playerStatus [p].y+1].hasRightWall) {
-								Board.MoveRight (p,2);
-								playerStatus [p].currentTurn = false;
+                                MoveRight(p, 2);
+								Board.MoveRight (p, 2, -1);
+                                playerStatus [p].currentTurn = false;
 							}
 							// going Right by 1 AND Down by 1
 							else if(xDiff == 1 && yDiff == 1 &&
@@ -407,8 +439,9 @@ public class GameManager : MonoBehaviour {
 							  (!boardStatus [playerStatus [p].x, playerStatus [p].y].hasBotWall && //going Down then Right
 							 	boardStatus [playerStatus [p].x+1, playerStatus [p].y].hasBotWall &&
 							   !boardStatus [playerStatus [p].x+1, playerStatus [p].y].isOpen)) ){
-									Board.MoveRight (p,1,true);
-									playerStatus [p].currentTurn = false;
+                                MoveRight(p, 1, true);
+								Board.MoveRight (p,1, -1, true);
+                                playerStatus [p].currentTurn = false;
 							}
 						}
 
@@ -423,8 +456,9 @@ public class GameManager : MonoBehaviour {
 						//if wall can be placed, place it and end turn
 						if (playerStatus[p].wallsLeft > 0 && Board.CheckWallH (tempPeg.x, tempPeg.y)) {
                             PlaceWallH(tempPeg.x, tempPeg.y);
-							playerStatus [p].currentTurn = false;
+                            Board.PlaceWallH(tempPeg.x, tempPeg.y);
 							playerStatus [p].wallsLeft--;
+							playerStatus [p].currentTurn = false;
 							UpdateWallRemTxt ();
 						}
 					}
@@ -444,7 +478,8 @@ public class GameManager : MonoBehaviour {
 						//if wall can be placed, place it and end turn
 						if (playerStatus[p].wallsLeft > 0 && Board.CheckWallV (tempPeg.x, tempPeg.y)) {
                             PlaceWallV(tempPeg.x, tempPeg.y);
-							playerStatus [p].currentTurn = false;
+                            Board.PlaceWallV(tempPeg.x, tempPeg.y);
+                            playerStatus [p].currentTurn = false;
 							playerStatus [p].wallsLeft--;
 							UpdateWallRemTxt ();
 						}
@@ -492,6 +527,64 @@ public class GameManager : MonoBehaviour {
         //wallPegStatus[xPos, yPos].isOpen = false;
         //boardStatus[xPos, yPos].hasRightWall = true;
         //boardStatus[xPos + 1, yPos].hasRightWall = true;
+    }
+
+    public bool MoveDown(int p, int movement, bool turnjumping = false)
+    {
+        if (!turnjumping)
+        {
+            playerStatus[p].transform.position = boardStatus[playerStatus[p].x + movement, playerStatus[p].y].transform.position + new Vector3(0, 0, -1f);
+        }
+        else
+        {
+            playerStatus[p].transform.position = boardStatus[playerStatus[p].x + movement, playerStatus[p].y - movement].transform.position + new Vector3(0, 0, -1f);
+        }
+        return false;
+    }
+
+    //if turn jumping is false it will move either 1 space or 2(jumping directly)
+    //if turn jumping is true it will move up and right
+    public bool MoveUp(int p, int movement, bool turnjumping = false)
+    {
+        if (!turnjumping)
+        {
+            playerStatus[p].transform.position = boardStatus[playerStatus[p].x - movement, playerStatus[p].y].transform.position + new Vector3(0, 0, -1f);
+        }
+        else
+        {
+            playerStatus[p].transform.position = boardStatus[playerStatus[p].x - movement, playerStatus[p].y + movement].transform.position + new Vector3(0, 0, -1f);
+        }
+        return false;
+    }
+
+    //if turn jumping is false it will move either 1 space or 2(jumping directly)
+    //if turn jumping is true it will move left and up
+    public bool MoveLeft(int p, int movement, bool turnjumping = false)
+    {
+        if (!turnjumping)
+        {
+            playerStatus[p].transform.position = boardStatus[playerStatus[p].x, playerStatus[p].y - movement].transform.position + new Vector3(0, 0, -1f);
+        }
+        else
+        {
+            playerStatus[p].transform.position = boardStatus[playerStatus[p].x - movement, playerStatus[p].y - movement].transform.position + new Vector3(0, 0, -1f);
+        }
+        return false;
+    }
+
+    //if turn jumping is false it will move either 1 space or 2(jumping directly)
+    //if turn jumping is true it will move right and down
+    public bool MoveRight(int p, int movement, bool turnjumping = false)
+    {
+        if (!turnjumping)
+        {
+            playerStatus[p].transform.position = boardStatus[playerStatus[p].x, playerStatus[p].y + movement].transform.position + new Vector3(0, 0, -1f);
+        }
+        else
+        {
+            playerStatus[p].transform.position = boardStatus[playerStatus[p].x + movement, playerStatus[p].y + movement].transform.position + new Vector3(0, 0, -1f);
+        }
+        return false;
     }
 
     void UpdateWallRemTxt()
