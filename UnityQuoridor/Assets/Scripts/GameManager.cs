@@ -31,8 +31,9 @@ public class GameManager : MonoBehaviour {
 	public GameObject gmPanel;
 
 	public float startDelay = 1f;
+	public float aiDelay = 10f;
 	private WaitForSeconds m_StartWait;
-	//private WaitForSeconds m_EndWait; // Unused?
+	private WaitForSeconds m_AiWait;
 
 	int totalWalls = 20;
 	bool gameOver = false;
@@ -72,6 +73,7 @@ public class GameManager : MonoBehaviour {
 		SpawnPlayers (); // make references to players (and Ai's)
 
 		m_StartWait = new WaitForSeconds (startDelay);
+		m_AiWait = new WaitForSeconds (aiDelay);
 		StartCoroutine (GameLoop());
 	}
 		
@@ -241,7 +243,9 @@ public class GameManager : MonoBehaviour {
 		//move or choose wall
 		playerStatus [playerNum].currentTurn = true;
 		playersTurnText.text = "Player " + (playerNum+1) + "'s Turn!";
-        Assets.Scripts.ActionFunction action = MyAgent.NextMove(Board);
+		yield return m_StartWait; //Testing------------------------------------------------------------------!
+        Assets.Scripts.ActionFunction action = MyAgent.NextMove(Board); // <- currently has an issue
+		yield return m_AiWait; // wait 10 seconds for decision
         if (action.function == null)
             Debug.LogError("Agent action is null. Something is wrong");
         
@@ -269,7 +273,7 @@ public class GameManager : MonoBehaviour {
         
         Board.ExecuteFunction(action);
         playerStatus[playerNum].currentTurn = false;
-        return null;
+       yield return null;
         //yield return m_StartWait; // wait a second so Ai turn doesn't seem instant.
         //while (playerStatus [playerNum].currentTurn) {
         //	// Decide whether to Place wall or Move, then execute the placement or movement.
