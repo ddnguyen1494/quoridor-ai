@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Collections;
 using System.Diagnostics;
+using UnityEngine; //just for Debug. Delete once function works properly!!!
 
 namespace Assets.Scripts
 {
@@ -19,17 +20,20 @@ namespace Assets.Scripts
         //return Agent's decision
         public ActionFunction NextMove(Board state)
         {
+			UnityEngine.Debug.Log("Start of ActionFunction in Agent Class!"); //delete once fnc is complete
             ActionFunction bestAction = new ActionFunction();
             root = new Node(state, 0, new ActionFunction(), 1);
             Stopwatch sw = new Stopwatch();
             try
             {
+				sw.Start();
                 do
                 {
                     current_depth++;
-                    sw.Start();
+                    
                     bestAction = AlphaBeta.Search(root);
-                } while (sw.ElapsedMilliseconds / 1000 < 10 && current_depth < MAX_DEPTH); // 10 seconds to think
+				} while (sw.ElapsedMilliseconds / 1000 < 10 && current_depth < MAX_DEPTH); // 10 seconds to think
+				sw.Stop();
             }
             catch(Exception ex)
             {
