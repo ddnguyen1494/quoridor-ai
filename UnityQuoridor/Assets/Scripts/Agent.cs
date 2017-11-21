@@ -72,10 +72,11 @@ namespace Assets.Scripts
             int nextPlayer = (p + 1) % 1;
             Board newBoard = new Board(node.State);
             #region Player 1's Successors
-            if (node.Player == PLAYER1)
+            if (node.Player == PLAYER1)  //first check in all if statemtents is the players position in relation to moving
             {
                 //Move up
-                if (!boardStatus[playerStatus[p].x - 1, playerStatus[p].y].hasBotWall)
+				if (playerStatus[p].x > 0 &&
+				 !boardStatus[playerStatus[p].x - 1, playerStatus[p].y].hasBotWall)
                 {
                     newBoard.MoveUp(p, 1, 1);
                     node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveUp, p, 1, 1), nextPlayer));
@@ -83,7 +84,8 @@ namespace Assets.Scripts
                 else
                 {
                     // going up jumping over 1 player directly
-                    if (!boardStatus[playerStatus[p].x - 1, playerStatus[p].y].hasBotWall &&
+					if (playerStatus[p].x > 1 && 
+					 !boardStatus[playerStatus[p].x - 1, playerStatus[p].y].hasBotWall &&
                      !boardStatus[playerStatus[p].x - 1, playerStatus[p].y].isOpen &&
                      !boardStatus[playerStatus[p].x - 2, playerStatus[p].y].hasBotWall)
                     {
@@ -92,26 +94,30 @@ namespace Assets.Scripts
                         node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveUp, p, 1, 2), nextPlayer));
                     }
                     // going Up by 1 and Right by 1
-                    if (((!boardStatus[playerStatus[p].x - 1, playerStatus[p].y].hasBotWall && //going up then Right
+					if ((playerStatus[p].x > 0 && playerStatus[p].y < 8) && (
+						  (!boardStatus[playerStatus[p].x - 1, playerStatus[p].y].hasBotWall && //going up then Right
                            boardStatus[playerStatus[p].x - 2, playerStatus[p].y].hasBotWall &&
                           !boardStatus[playerStatus[p].x - 1, playerStatus[p].y].isOpen)
                           ||
                          (!boardStatus[playerStatus[p].x, playerStatus[p].y].hasRightWall && //going Right then Up
                            boardStatus[playerStatus[p].x, playerStatus[p].y + 1].hasRightWall &&
-                          !boardStatus[playerStatus[p].x, playerStatus[p].y + 1].isOpen)))
+                          !boardStatus[playerStatus[p].x, playerStatus[p].y + 1].isOpen)
+						) )
                     {
                         newBoard = new Board(node.State);
                         newBoard.MoveUp(p, 1, 1, true);
                         node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveUp, p, 1, 1, true), nextPlayer));
                     }
                     //going Left by 1 AND Up by 1
-                    if (((!boardStatus[playerStatus[p].x, playerStatus[p].y - 1].hasRightWall && //going left then up
-                            boardStatus[playerStatus[p].x, playerStatus[p].y - 2].hasRightWall &&
-                            !boardStatus[playerStatus[p].x, playerStatus[p].y - 1].isOpen)
+					if ((playerStatus[p].x > 0 && playerStatus[p].y > 0) && (
+						(!boardStatus[playerStatus[p].x, playerStatus[p].y - 1].hasRightWall && //going left then up
+                          boardStatus[playerStatus[p].x, playerStatus[p].y - 2].hasRightWall &&
+                         !boardStatus[playerStatus[p].x, playerStatus[p].y - 1].isOpen)
                             ||
-                            (!boardStatus[playerStatus[p].x - 1, playerStatus[p].y].hasBotWall && //going up then left
-                                boardStatus[playerStatus[p].x - 2, playerStatus[p].y].hasBotWall &&
-                                !boardStatus[playerStatus[p].x - 1, playerStatus[p].y].isOpen)))
+                        (!boardStatus[playerStatus[p].x - 1, playerStatus[p].y].hasBotWall && //going up then left
+                          boardStatus[playerStatus[p].x - 2, playerStatus[p].y].hasBotWall &&
+                         !boardStatus[playerStatus[p].x - 1, playerStatus[p].y].isOpen)
+						) )
                     {
                         newBoard = new Board(node.State);
                         newBoard.MoveLeft(p, 1, 2, true);
@@ -120,14 +126,16 @@ namespace Assets.Scripts
                 }
 
                 //Move Left
-                if (!boardStatus[playerStatus[p].x, playerStatus[p].y - 1].hasRightWall)
+				if (playerStatus[p].y > 0 &&
+				 !boardStatus[playerStatus[p].x, playerStatus[p].y - 1].hasRightWall)
                 {
                     newBoard = new Board(node.State);
                     newBoard.MoveLeft(p, 1, 2);
                     node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveLeft, p, 1, 2), nextPlayer));
                 }
                 // going Left jumping over 1 player directly
-                else if (!boardStatus[playerStatus[p].x, playerStatus[p].y - 1].hasRightWall &&
+				else if (playerStatus[p].y > 1 &&
+				 !boardStatus[playerStatus[p].x, playerStatus[p].y - 1].hasRightWall &&
                  !boardStatus[playerStatus[p].x, playerStatus[p].y - 1].isOpen &&
                  !boardStatus[playerStatus[p].x, playerStatus[p].y - 2].hasRightWall)
                 {
@@ -137,13 +145,16 @@ namespace Assets.Scripts
                 }
 
                 //Move Right
-                if (!boardStatus[playerStatus[p].x, playerStatus[p].y].hasRightWall)
+				if (playerStatus[p].y < 8 &&
+				 !boardStatus[playerStatus[p].x, playerStatus[p].y].hasRightWall)
                 {
                     newBoard = new Board(node.State);
                     newBoard.MoveRight(p, 1, 0);
                     node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveRight, p, 1, 0), nextPlayer));
                 }
-                else if (!boardStatus[playerStatus[p].x, playerStatus[p].y].hasRightWall &&
+				//going Right by jumping over 1 player directly
+				else if (playerStatus[p].y < 7 &&
+				 !boardStatus[playerStatus[p].x, playerStatus[p].y].hasRightWall &&
                  !boardStatus[playerStatus[p].x, playerStatus[p].y + 1].isOpen &&
                  !boardStatus[playerStatus[p].x, playerStatus[p].y + 1].hasRightWall)
                 {
@@ -154,7 +165,8 @@ namespace Assets.Scripts
 
                 //Move Down
                 // going down by 1 (checks on location and for walls)
-                if (!boardStatus[playerStatus[p].x, playerStatus[p].y].hasBotWall)
+				if (playerStatus[p].x < 8 &&
+				 !boardStatus[playerStatus[p].x, playerStatus[p].y].hasBotWall)
                 {
                     newBoard = new Board(node.State);
                     newBoard.MoveDown(p, 1, 3);
@@ -163,37 +175,40 @@ namespace Assets.Scripts
                 else
                 {
                     // going down jumping over 1 player directly
-                    if (!boardStatus[playerStatus[p].x, playerStatus[p].y].hasBotWall &&
-                        !boardStatus[playerStatus[p].x + 1, playerStatus[p].y].isOpen &&
-                        !boardStatus[playerStatus[p].x + 1, playerStatus[p].y].hasBotWall)
+					if (playerStatus[p].x < 7 &&
+					 !boardStatus[playerStatus[p].x, playerStatus[p].y].hasBotWall &&
+                     !boardStatus[playerStatus[p].x + 1, playerStatus[p].y].isOpen &&
+                     !boardStatus[playerStatus[p].x + 1, playerStatus[p].y].hasBotWall)
                     {
                         newBoard = new Board(node.State);
                         newBoard.MoveDown(p, 2, 3);
                         node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveDown, p, 2, 3), nextPlayer));
                     }
                     // going Down by 1 AND to the Left by 1
-                    if (
-                        ((!boardStatus[playerStatus[p].x, playerStatus[p].y].hasBotWall && //going down then left
-                            boardStatus[playerStatus[p].x + 1, playerStatus[p].y].hasBotWall &&
-                            !boardStatus[playerStatus[p].x + 1, playerStatus[p].y].isOpen)
-                            ||
-                            (!boardStatus[playerStatus[p].x, playerStatus[p].y - 1].hasRightWall && //going left then down
-                                boardStatus[playerStatus[p].x, playerStatus[p].y - 2].hasRightWall &&
-                                !boardStatus[playerStatus[p].x, playerStatus[p].y - 1].isOpen)))
+					if ((playerStatus[p].x < 8 && playerStatus[p].y > 0) && (
+						(!boardStatus[playerStatus[p].x, playerStatus[p].y].hasBotWall && //going down then left
+                          boardStatus[playerStatus[p].x + 1, playerStatus[p].y].hasBotWall &&
+                         !boardStatus[playerStatus[p].x + 1, playerStatus[p].y].isOpen)
+                          ||
+                        (!boardStatus[playerStatus[p].x, playerStatus[p].y - 1].hasRightWall && //going left then down
+                          boardStatus[playerStatus[p].x, playerStatus[p].y - 2].hasRightWall &&
+                         !boardStatus[playerStatus[p].x, playerStatus[p].y - 1].isOpen)
+					    ))
                     {
                         newBoard = new Board(node.State);
                         newBoard.MoveDown(p, 1, 3, true);
                         node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveDown, p, 1, 3, true), nextPlayer));
                     }
                     // going Right by 1 AND Down by 1
-                    if (
-                     ((!boardStatus[playerStatus[p].x, playerStatus[p].y].hasRightWall && //going Right then Down
-                        boardStatus[playerStatus[p].x, playerStatus[p].y + 1].hasRightWall &&
-                       !boardStatus[playerStatus[p].x, playerStatus[p].y + 1].isOpen)
+					if ((playerStatus[p].x < 8 && playerStatus[p].y < 8) && (
+                     (!boardStatus[playerStatus[p].x, playerStatus[p].y].hasRightWall && //going Right then Down
+                       boardStatus[playerStatus[p].x, playerStatus[p].y + 1].hasRightWall &&
+                      !boardStatus[playerStatus[p].x, playerStatus[p].y + 1].isOpen)
                        ||
-                      (!boardStatus[playerStatus[p].x, playerStatus[p].y].hasBotWall && //going Down then Right
-                        boardStatus[playerStatus[p].x + 1, playerStatus[p].y].hasBotWall &&
-                       !boardStatus[playerStatus[p].x + 1, playerStatus[p].y].isOpen)))
+                     (!boardStatus[playerStatus[p].x, playerStatus[p].y].hasBotWall && //going Down then Right
+                       boardStatus[playerStatus[p].x + 1, playerStatus[p].y].hasBotWall &&
+                      !boardStatus[playerStatus[p].x + 1, playerStatus[p].y].isOpen)
+					   ))
                     {
                         newBoard = new Board(node.State);
                         newBoard.MoveRight(p, 1, 0, true);
@@ -206,9 +221,8 @@ namespace Assets.Scripts
             //Player 2 prioritizes moving down -> left or right -> Wall -> Up (tentative Move Ordering)
             //Move Down
             // going down by 1 (checks on location and for walls)
-            //Move Down
-            // going down by 1 (checks on location and for walls)
-            if (!boardStatus[playerStatus[p].x, playerStatus[p].y].hasBotWall)
+			if (playerStatus[p].x < 8 &&
+			 !boardStatus[playerStatus[p].x, playerStatus[p].y].hasBotWall)
             {
                 newBoard = new Board(node.State);
                 newBoard.MoveDown(p, 1, 3);
@@ -217,7 +231,8 @@ namespace Assets.Scripts
             else
             {
                 // going down jumping over 1 player directly
-                if (!boardStatus[playerStatus[p].x, playerStatus[p].y].hasBotWall &&
+				if (playerStatus[p].x < 7 &&
+					!boardStatus[playerStatus[p].x, playerStatus[p].y].hasBotWall &&
                     !boardStatus[playerStatus[p].x + 1, playerStatus[p].y].isOpen &&
                     !boardStatus[playerStatus[p].x + 1, playerStatus[p].y].hasBotWall)
                 {
@@ -226,24 +241,24 @@ namespace Assets.Scripts
                     node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveDown, p, 2, 3), nextPlayer));
                 }
                 // going Down by 1 AND to the Left by 1
-                if (
-                    ((!boardStatus[playerStatus[p].x, playerStatus[p].y].hasBotWall && //going down then left
-                        boardStatus[playerStatus[p].x + 1, playerStatus[p].y].hasBotWall &&
-                        !boardStatus[playerStatus[p].x + 1, playerStatus[p].y].isOpen)
-                        ||
-                        (!boardStatus[playerStatus[p].x, playerStatus[p].y - 1].hasRightWall && //going left then down
-                            boardStatus[playerStatus[p].x, playerStatus[p].y - 2].hasRightWall &&
-                            !boardStatus[playerStatus[p].x, playerStatus[p].y - 1].isOpen)))
+				if ((playerStatus[p].x < 8 && playerStatus[p].y > 0) && (
+                  (!boardStatus[playerStatus[p].x, playerStatus[p].y].hasBotWall && //going down then left
+                    boardStatus[playerStatus[p].x + 1, playerStatus[p].y].hasBotWall &&
+                   !boardStatus[playerStatus[p].x + 1, playerStatus[p].y].isOpen)
+                    ||
+                  (!boardStatus[playerStatus[p].x, playerStatus[p].y - 1].hasRightWall && //going left then down
+                    boardStatus[playerStatus[p].x, playerStatus[p].y - 2].hasRightWall &&
+                   !boardStatus[playerStatus[p].x, playerStatus[p].y - 1].isOpen)))
                 {
                     newBoard = new Board(node.State);
                     newBoard.MoveDown(p, 1, 3, true);
                     node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveDown, p, 1, 3, true), nextPlayer));
                 }
                 // going Right by 1 AND Down by 1
-                if (
-                 ((!boardStatus[playerStatus[p].x, playerStatus[p].y].hasRightWall && //going Right then Down
-                    boardStatus[playerStatus[p].x, playerStatus[p].y + 1].hasRightWall &&
-                   !boardStatus[playerStatus[p].x, playerStatus[p].y + 1].isOpen)
+				if ((playerStatus[p].x < 8 && playerStatus[p].y < 8) && (
+                 (!boardStatus[playerStatus[p].x, playerStatus[p].y].hasRightWall && //going Right then Down
+                   boardStatus[playerStatus[p].x, playerStatus[p].y + 1].hasRightWall &&
+                  !boardStatus[playerStatus[p].x, playerStatus[p].y + 1].isOpen)
                    ||
                   (!boardStatus[playerStatus[p].x, playerStatus[p].y].hasBotWall && //going Down then Right
                     boardStatus[playerStatus[p].x + 1, playerStatus[p].y].hasBotWall &&
@@ -257,16 +272,18 @@ namespace Assets.Scripts
 
 
             //Move Left
-            if (playerStatus[p].y - 1 >= 0)
-            {
-                if (!boardStatus[playerStatus[p].x, playerStatus[p].y - 1].hasRightWall)
+         //   if (playerStatus[p].y - 1 >= 0)
+          //  {
+				if (playerStatus[p].y > 0 &&
+				 !boardStatus[playerStatus[p].x, playerStatus[p].y - 1].hasRightWall)
                 {
                     newBoard = new Board(node.State);
                     newBoard.MoveLeft(p, 1, 2);
                     node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveLeft, p, 1, 2), nextPlayer));
                 }
                 // going Left jumping over 1 player directly
-                else if (!boardStatus[playerStatus[p].x, playerStatus[p].y - 1].hasRightWall &&
+			else if (playerStatus[p].y > 1 &&
+				 !boardStatus[playerStatus[p].x, playerStatus[p].y - 1].hasRightWall &&
                  !boardStatus[playerStatus[p].x, playerStatus[p].y - 1].isOpen &&
                  !boardStatus[playerStatus[p].x, playerStatus[p].y - 2].hasRightWall)
                 {
@@ -274,15 +291,18 @@ namespace Assets.Scripts
                     newBoard.MoveLeft(p, 2, 2);
                     node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveLeft, p, 2, 2), nextPlayer));
                 }
-            }
+            //}
             //Move Right
-            if (!boardStatus[playerStatus[p].x, playerStatus[p].y].hasRightWall)
+			if (playerStatus[p].y < 8 &&
+			 !boardStatus[playerStatus[p].x, playerStatus[p].y].hasRightWall)
             {
                 newBoard = new Board(node.State);
                 newBoard.MoveRight(p, 1, 0);
                 node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveRight, p, 1, 0), nextPlayer));
             }
-            else if (!boardStatus[playerStatus[p].x, playerStatus[p].y].hasRightWall &&
+			//going Right jumping over 1 player directly
+			else if (playerStatus[p].y < 7 &&
+			 !boardStatus[playerStatus[p].x, playerStatus[p].y].hasRightWall &&
              !boardStatus[playerStatus[p].x, playerStatus[p].y + 1].isOpen &&
              !boardStatus[playerStatus[p].x, playerStatus[p].y + 1].hasRightWall)
             {
@@ -292,7 +312,8 @@ namespace Assets.Scripts
             }
 
             //Move up
-            if (!boardStatus[playerStatus[p].x - 1, playerStatus[p].y].hasBotWall)
+			if (playerStatus[p].x > 0 &&
+			 !boardStatus[playerStatus[p].x - 1, playerStatus[p].y].hasBotWall)
             {
                 newBoard.MoveUp(p, 1, 1);
                 node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveUp, p, 1, 1), nextPlayer));
@@ -300,7 +321,8 @@ namespace Assets.Scripts
             else
             {
                 // going up jumping over 1 player directly
-                if (!boardStatus[playerStatus[p].x - 1, playerStatus[p].y].hasBotWall &&
+				if (playerStatus[p].x > 1 &&
+				 !boardStatus[playerStatus[p].x - 1, playerStatus[p].y].hasBotWall &&
                  !boardStatus[playerStatus[p].x - 1, playerStatus[p].y].isOpen &&
                  !boardStatus[playerStatus[p].x - 2, playerStatus[p].y].hasBotWall)
                 {
@@ -309,26 +331,28 @@ namespace Assets.Scripts
                     node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveUp, p, 1, 2), nextPlayer));
                 }
                 // going Up by 1 and Right by 1
-                if (((!boardStatus[playerStatus[p].x - 1, playerStatus[p].y].hasBotWall && //going up then Right
-                       boardStatus[playerStatus[p].x - 2, playerStatus[p].y].hasBotWall &&
-                      !boardStatus[playerStatus[p].x - 1, playerStatus[p].y].isOpen)
-                      ||
-                     (!boardStatus[playerStatus[p].x, playerStatus[p].y].hasRightWall && //going Right then Up
-                       boardStatus[playerStatus[p].x, playerStatus[p].y + 1].hasRightWall &&
-                      !boardStatus[playerStatus[p].x, playerStatus[p].y + 1].isOpen)))
+				if ((playerStatus[p].x > 0 && playerStatus[p].y < 8) && (
+				 (!boardStatus[playerStatus[p].x - 1, playerStatus[p].y].hasBotWall && //going up then Right
+                   boardStatus[playerStatus[p].x - 2, playerStatus[p].y].hasBotWall &&
+                  !boardStatus[playerStatus[p].x - 1, playerStatus[p].y].isOpen)
+                   ||
+                 (!boardStatus[playerStatus[p].x, playerStatus[p].y].hasRightWall && //going Right then Up
+                   boardStatus[playerStatus[p].x, playerStatus[p].y + 1].hasRightWall &&
+                  !boardStatus[playerStatus[p].x, playerStatus[p].y + 1].isOpen)))
                 {
                     newBoard = new Board(node.State);
                     newBoard.MoveUp(p, 1, 1, true);
                     node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveUp, p, 1, 1, true), nextPlayer));
                 }
                 //going Left by 1 AND Up by 1
-                if (((!boardStatus[playerStatus[p].x, playerStatus[p].y - 1].hasRightWall && //going left then up
-                        boardStatus[playerStatus[p].x, playerStatus[p].y - 2].hasRightWall &&
-                        !boardStatus[playerStatus[p].x, playerStatus[p].y - 1].isOpen)
-                        ||
-                        (!boardStatus[playerStatus[p].x - 1, playerStatus[p].y].hasBotWall && //going up then left
-                            boardStatus[playerStatus[p].x - 2, playerStatus[p].y].hasBotWall &&
-                            !boardStatus[playerStatus[p].x - 1, playerStatus[p].y].isOpen)))
+				if ((playerStatus[p].x > 0 && playerStatus[p].y > 0) && (
+				 (!boardStatus[playerStatus[p].x, playerStatus[p].y - 1].hasRightWall && //going left then up
+                   boardStatus[playerStatus[p].x, playerStatus[p].y - 2].hasRightWall &&
+                  !boardStatus[playerStatus[p].x, playerStatus[p].y - 1].isOpen)
+                   ||
+                 (!boardStatus[playerStatus[p].x - 1, playerStatus[p].y].hasBotWall && //going up then left
+                   boardStatus[playerStatus[p].x - 2, playerStatus[p].y].hasBotWall &&
+                  !boardStatus[playerStatus[p].x - 1, playerStatus[p].y].isOpen)))
                 {
                     newBoard = new Board(node.State);
                     newBoard.MoveLeft(p, 1, 2, true);
