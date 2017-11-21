@@ -153,11 +153,13 @@ public class GameManager : MonoBehaviour {
 			playerStatus[1].goalX = 8;
 			playerStatus[1].goalY = -1;
 			boardStatus[0, 4].isOpen = false;
-            if (MainMenu.playerSettings == 1) // If PvE was selected make 2nd player a Bot
-            {
-                playerStatus[1].isAi = true;
-                MyAgent = new Assets.Scripts.Agent();
-            }
+            //if (MainMenu.playerSettings == 1) // If PvE was selected make 2nd player a Bot
+            //{
+                //playerStatus[1].isAi = true;
+                //MyAgent = new Assets.Scripts.Agent();
+            //}
+            playerStatus[1].isAi = true;
+            MyAgent = new Assets.Scripts.Agent();
 
         }
 		// For 4 players set up start information this way
@@ -243,9 +245,7 @@ public class GameManager : MonoBehaviour {
 		//move or choose wall
 		playerStatus [playerNum].currentTurn = true;
 		playersTurnText.text = "Player " + (playerNum+1) + "'s Turn!";
-		yield return m_StartWait; //Testing------------------------------------------------------------------!
         Assets.Scripts.ActionFunction action = MyAgent.NextMove(Board); // <- currently has an issue
-		yield return m_AiWait; // wait 10 seconds for decision
         if (action.function == null)
             Debug.LogError("Agent action is null. Something is wrong");
         
@@ -328,7 +328,7 @@ public class GameManager : MonoBehaviour {
 							if (xDiff == 1 && yDiff == 0 &&
 								!boardStatus [playerStatus [p].x, playerStatus [p].y].hasBotWall) {
                                 MoveDown(p, 1);
-								Board.MoveDown (p, 1, -1);
+								Assets.Scripts.Board.MoveDown(Board, p, 1, -1);
 								playerStatus [p].currentTurn = false;
 							}
 							// going down jumping over 1 player directly
@@ -337,7 +337,7 @@ public class GameManager : MonoBehaviour {
 								!boardStatus [playerStatus [p].x+1, playerStatus [p].y].isOpen &&
 								!boardStatus [playerStatus [p].x+1, playerStatus [p].y].hasBotWall) {
                                 MoveDown(p, 2);
-								Board.MoveDown (p, 2, -1);
+								Assets.Scripts.Board.MoveDown(Board, p, 2, -1);
                                 playerStatus [p].currentTurn = false;
 							}
 							// going Down by 1 AND to the Left by 1
@@ -350,7 +350,7 @@ public class GameManager : MonoBehaviour {
 										boardStatus [playerStatus [p].x, playerStatus [p].y-2].hasRightWall &&
 										!boardStatus [playerStatus [p].x, playerStatus [p].y-1].isOpen)) ){
                                 MoveDown(p, 1, true);
-								Board.MoveDown (p, 1, -1, true);
+								Assets.Scripts.Board.MoveDown(Board, p, 1, -1, true);
                                 playerStatus [p].currentTurn = false;
 							}
 
@@ -359,7 +359,7 @@ public class GameManager : MonoBehaviour {
 							else if (xDiff == -1 && yDiff == 0 &&
 							 !boardStatus [playerStatus [p].x-1, playerStatus [p].y].hasBotWall) {
                                 MoveUp(p, 1);
-								Board.MoveUp (p, 1, -1);
+								Assets.Scripts.Board.MoveUp(Board, p, 1, -1);
                                 playerStatus [p].currentTurn = false;
 							}
 							// going up jumping over 1 player directly
@@ -368,7 +368,7 @@ public class GameManager : MonoBehaviour {
 							 !boardStatus [playerStatus [p].x-1, playerStatus [p].y].isOpen &&
 							 !boardStatus [playerStatus [p].x-2, playerStatus [p].y].hasBotWall) {
                                 MoveUp(p, 2);
-								Board.MoveUp (p, 2, -1);
+								Assets.Scripts.Board.MoveUp(Board, p, 2, -1);
                                 playerStatus [p].currentTurn = false;
 							}
 							// going Up by 1 AND Right by 1
@@ -381,7 +381,7 @@ public class GameManager : MonoBehaviour {
 								   boardStatus [playerStatus [p].x, playerStatus [p].y+1].hasRightWall &&
 								  !boardStatus [playerStatus [p].x, playerStatus [p].y+1].isOpen))  ){
                                 MoveUp(p, 1, true);
-								Board.MoveUp (p, 1, -1, true);
+								Assets.Scripts.Board.MoveUp(Board, p, 1, -1, true);
                                 playerStatus [p].currentTurn = false;
 
 							}
@@ -391,7 +391,7 @@ public class GameManager : MonoBehaviour {
 							else if(xDiff == 0 && yDiff == -1 &&
 							 !boardStatus [playerStatus [p].x, playerStatus [p].y-1].hasRightWall) {
                                 MoveLeft(p, 1);
-								Board.MoveLeft (p, 1, -1);
+								Assets.Scripts.Board.MoveLeft(Board, p, 1, -1);
                                 playerStatus [p].currentTurn = false;
 							}
 							// going Left jumping over 1 player directly
@@ -400,7 +400,7 @@ public class GameManager : MonoBehaviour {
 							 !boardStatus [playerStatus [p].x, playerStatus [p].y-1].isOpen &&
 							 !boardStatus [playerStatus [p].x, playerStatus [p].y-2].hasRightWall) {
                                 MoveLeft(p, 2);
-								Board.MoveLeft (p,2, -1);
+								Assets.Scripts.Board.MoveLeft(Board, p,2, -1);
                                 playerStatus [p].currentTurn = false;
 							}
 							//going Left by 1 AND Up by 1
@@ -413,7 +413,7 @@ public class GameManager : MonoBehaviour {
 										boardStatus [playerStatus [p].x-2, playerStatus [p].y].hasBotWall &&
 										!boardStatus [playerStatus [p].x-1, playerStatus [p].y].isOpen))  ){
                                 MoveLeft(p, 1, true);
-								Board.MoveLeft (p, 1, -1, true);
+								Assets.Scripts.Board.MoveLeft(Board, p, 1, -1, true);
                                 playerStatus [p].currentTurn = false;
 
 							}
@@ -423,7 +423,7 @@ public class GameManager : MonoBehaviour {
 							else if(xDiff == 0 && yDiff == 1 &&
 							 !boardStatus [playerStatus [p].x, playerStatus [p].y].hasRightWall) {
                                 MoveRight(p, 1);
-								Board.MoveRight (p, 1, -1);
+								Assets.Scripts.Board.MoveRight(Board, p, 1, -1);
                                 playerStatus [p].currentTurn = false;
 							}
 							else if(xDiff == 0 && yDiff == 2 &&
@@ -431,7 +431,7 @@ public class GameManager : MonoBehaviour {
 							 !boardStatus [playerStatus [p].x, playerStatus [p].y+1].isOpen &&
 							 !boardStatus [playerStatus [p].x, playerStatus [p].y+1].hasRightWall) {
                                 MoveRight(p, 2);
-								Board.MoveRight (p, 2, -1);
+								Assets.Scripts.Board.MoveRight(Board, p, 2, -1);
                                 playerStatus [p].currentTurn = false;
 							}
 							// going Right by 1 AND Down by 1
@@ -444,7 +444,7 @@ public class GameManager : MonoBehaviour {
 							 	boardStatus [playerStatus [p].x+1, playerStatus [p].y].hasBotWall &&
 							   !boardStatus [playerStatus [p].x+1, playerStatus [p].y].isOpen)) ){
                                 MoveRight(p, 1, true);
-								Board.MoveRight (p,1, -1, true);
+								Assets.Scripts.Board.MoveRight(Board, p,1, -1, true);
                                 playerStatus [p].currentTurn = false;
 							}
 						}

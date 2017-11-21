@@ -34,6 +34,7 @@ namespace Assets.Scripts
                     bestAction = AlphaBeta.Search(root);
 				} while (sw.ElapsedMilliseconds / 1000 < 10 && current_depth < MAX_DEPTH); // 10 seconds to think
 				sw.Stop();
+                current_depth = 0;
             }
             catch(Exception ex)
             {
@@ -82,8 +83,8 @@ namespace Assets.Scripts
 				if (playerStatus[p].x > 0 &&
 				 !boardStatus[playerStatus[p].x - 1, playerStatus[p].y].hasBotWall)
                 {
-                    newBoard.MoveUp(p, 1, 1);
-                    node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveUp, p, 1, 1), nextPlayer));
+                    Board.MoveUp(newBoard,p, 1, 1);
+                    node.Children.Add(new Node(newBoard, 0, new ActionFunction(Board.MoveUp, p, 1, 1), nextPlayer));
                 }
                 else
                 {
@@ -94,8 +95,8 @@ namespace Assets.Scripts
                      !boardStatus[playerStatus[p].x - 2, playerStatus[p].y].hasBotWall)
                     {
                         newBoard = new Board(node.State);
-                        newBoard.MoveUp(p, 2, 1);
-                        node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveUp, p, 1, 2), nextPlayer));
+                        Board.MoveUp(newBoard,p, 2, 1);
+                        node.Children.Add(new Node(newBoard, 0, new ActionFunction(Board.MoveUp, p, 1, 2), nextPlayer));
                     }
                     // going Up by 1 and Right by 1
 					if ((playerStatus[p].x > 0 && playerStatus[p].y < 8) && (
@@ -109,8 +110,8 @@ namespace Assets.Scripts
 						) )
                     {
                         newBoard = new Board(node.State);
-                        newBoard.MoveUp(p, 1, 1, true);
-                        node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveUp, p, 1, 1, true), nextPlayer));
+                        Board.MoveUp(newBoard,p, 1, 1, true);
+                        node.Children.Add(new Node(newBoard, 0, new ActionFunction(Board.MoveUp, p, 1, 1, true), nextPlayer));
                     }
                     //going Left by 1 AND Up by 1
 					if ((playerStatus[p].x > 0 && playerStatus[p].y > 0) && (
@@ -124,8 +125,8 @@ namespace Assets.Scripts
 						) )
                     {
                         newBoard = new Board(node.State);
-                        newBoard.MoveLeft(p, 1, 2, true);
-                        node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveLeft, p, 1, 2, true), nextPlayer));
+                        Board.MoveLeft(newBoard,p, 1, 2, true);
+                        node.Children.Add(new Node(newBoard, 0, new ActionFunction(Board.MoveLeft, p, 1, 2, true), nextPlayer));
                     }
                 }
 
@@ -134,8 +135,8 @@ namespace Assets.Scripts
 				 !boardStatus[playerStatus[p].x, playerStatus[p].y - 1].hasRightWall)
                 {
                     newBoard = new Board(node.State);
-                    newBoard.MoveLeft(p, 1, 2);
-                    node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveLeft, p, 1, 2), nextPlayer));
+                    Board.MoveLeft(newBoard,p, 1, 2);
+                    node.Children.Add(new Node(newBoard, 0, new ActionFunction(Board.MoveLeft, p, 1, 2), nextPlayer));
                 }
                 // going Left jumping over 1 player directly
 				else if (playerStatus[p].y > 1 &&
@@ -144,8 +145,8 @@ namespace Assets.Scripts
                  !boardStatus[playerStatus[p].x, playerStatus[p].y - 2].hasRightWall)
                 {
                     newBoard = new Board(node.State);
-                    newBoard.MoveLeft(p, 2, 2);
-                    node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveLeft, p, 2, 2), nextPlayer));
+                    Board.MoveLeft(newBoard,p, 2, 2);
+                    node.Children.Add(new Node(newBoard, 0, new ActionFunction(Board.MoveLeft, p, 2, 2), nextPlayer));
                 }
 
                 //Move Right
@@ -153,8 +154,8 @@ namespace Assets.Scripts
 				 !boardStatus[playerStatus[p].x, playerStatus[p].y].hasRightWall)
                 {
                     newBoard = new Board(node.State);
-                    newBoard.MoveRight(p, 1, 0);
-                    node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveRight, p, 1, 0), nextPlayer));
+                    Board.MoveRight(newBoard,p, 1, 0);
+                    node.Children.Add(new Node(newBoard, 0, new ActionFunction(Board.MoveRight, p, 1, 0), nextPlayer));
                 }
 				//going Right by jumping over 1 player directly
 				else if (playerStatus[p].y < 7 &&
@@ -163,8 +164,8 @@ namespace Assets.Scripts
                  !boardStatus[playerStatus[p].x, playerStatus[p].y + 1].hasRightWall)
                 {
                     newBoard = new Board(node.State);
-                    newBoard.MoveRight(p, 2, 0);
-                    node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveRight, p, 2, 0), nextPlayer));
+                    Board.MoveRight(newBoard,p, 2, 0);
+                    node.Children.Add(new Node(newBoard, 0, new ActionFunction(Board.MoveRight, p, 2, 0), nextPlayer));
                 }
 
                 //Move Down
@@ -173,8 +174,8 @@ namespace Assets.Scripts
 				 !boardStatus[playerStatus[p].x, playerStatus[p].y].hasBotWall)
                 {
                     newBoard = new Board(node.State);
-                    newBoard.MoveDown(p, 1, 3);
-                    node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveDown, p, 1, 3), nextPlayer));
+                    Board.MoveDown(newBoard,p, 1, 3);
+                    node.Children.Add(new Node(newBoard, 0, new ActionFunction(Board.MoveDown, p, 1, 3), nextPlayer));
                 }
                 else
                 {
@@ -185,8 +186,8 @@ namespace Assets.Scripts
                      !boardStatus[playerStatus[p].x + 1, playerStatus[p].y].hasBotWall)
                     {
                         newBoard = new Board(node.State);
-                        newBoard.MoveDown(p, 2, 3);
-                        node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveDown, p, 2, 3), nextPlayer));
+                        Board.MoveDown(newBoard,p, 2, 3);
+                        node.Children.Add(new Node(newBoard, 0, new ActionFunction(Board.MoveDown, p, 2, 3), nextPlayer));
                     }
                     // going Down by 1 AND to the Left by 1
 					if ((playerStatus[p].x < 8 && playerStatus[p].y > 0) && (
@@ -200,8 +201,8 @@ namespace Assets.Scripts
 					    ))
                     {
                         newBoard = new Board(node.State);
-                        newBoard.MoveDown(p, 1, 3, true);
-                        node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveDown, p, 1, 3, true), nextPlayer));
+                        Board.MoveDown(newBoard,p, 1, 3, true);
+                        node.Children.Add(new Node(newBoard, 0, new ActionFunction(Board.MoveDown, p, 1, 3, true), nextPlayer));
                     }
                     // going Right by 1 AND Down by 1
 					if ((playerStatus[p].x < 8 && playerStatus[p].y < 8) && (
@@ -215,8 +216,8 @@ namespace Assets.Scripts
 					   ))
                     {
                         newBoard = new Board(node.State);
-                        newBoard.MoveRight(p, 1, 0, true);
-                        node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveRight, p, 1, 0, true), nextPlayer));
+                        Board.MoveRight(newBoard,p, 1, 0, true);
+                        node.Children.Add(new Node(newBoard, 0, new ActionFunction(Board.MoveRight, p, 1, 0, true), nextPlayer));
                     }
                 }
             }
@@ -229,8 +230,8 @@ namespace Assets.Scripts
 			 !boardStatus[playerStatus[p].x, playerStatus[p].y].hasBotWall)
             {
                 newBoard = new Board(node.State);
-                newBoard.MoveDown(p, 1, 3);
-                node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveDown, p, 1, 3), nextPlayer));
+                Board.MoveDown(newBoard,p, 1, 3);
+                node.Children.Add(new Node(newBoard, 0, new ActionFunction(Board.MoveDown, p, 1, 3), nextPlayer));
             }
             else
             {
@@ -241,8 +242,8 @@ namespace Assets.Scripts
                     !boardStatus[playerStatus[p].x + 1, playerStatus[p].y].hasBotWall)
                 {
                     newBoard = new Board(node.State);
-                    newBoard.MoveDown(p, 2, 3);
-                    node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveDown, p, 2, 3), nextPlayer));
+                    Board.MoveDown(newBoard,p, 2, 3);
+                    node.Children.Add(new Node(newBoard, 0, new ActionFunction(Board.MoveDown, p, 2, 3), nextPlayer));
                 }
                 // going Down by 1 AND to the Left by 1
 				if ((playerStatus[p].x < 8 && playerStatus[p].y > 0) && (
@@ -255,8 +256,8 @@ namespace Assets.Scripts
                    !boardStatus[playerStatus[p].x, playerStatus[p].y - 1].isOpen)))
                 {
                     newBoard = new Board(node.State);
-                    newBoard.MoveDown(p, 1, 3, true);
-                    node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveDown, p, 1, 3, true), nextPlayer));
+                    Board.MoveDown(newBoard,p, 1, 3, true);
+                    node.Children.Add(new Node(newBoard, 0, new ActionFunction(Board.MoveDown, p, 1, 3, true), nextPlayer));
                 }
                 // going Right by 1 AND Down by 1
 				if ((playerStatus[p].x < 8 && playerStatus[p].y < 8) && (
@@ -269,8 +270,8 @@ namespace Assets.Scripts
                    !boardStatus[playerStatus[p].x + 1, playerStatus[p].y].isOpen)))
                 {
                     newBoard = new Board(node.State);
-                    newBoard.MoveRight(p, 1, 0, true);
-                    node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveRight, p, 1, 0, true), nextPlayer));
+                    Board.MoveRight(newBoard,p, 1, 0, true);
+                    node.Children.Add(new Node(newBoard, 0, new ActionFunction(Board.MoveRight, p, 1, 0, true), nextPlayer));
                 }
             }
 
@@ -282,8 +283,8 @@ namespace Assets.Scripts
 				 !boardStatus[playerStatus[p].x, playerStatus[p].y - 1].hasRightWall)
                 {
                     newBoard = new Board(node.State);
-                    newBoard.MoveLeft(p, 1, 2);
-                    node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveLeft, p, 1, 2), nextPlayer));
+                    Board.MoveLeft(newBoard,p, 1, 2);
+                    node.Children.Add(new Node(newBoard, 0, new ActionFunction(Board.MoveLeft, p, 1, 2), nextPlayer));
                 }
                 // going Left jumping over 1 player directly
 			else if (playerStatus[p].y > 1 &&
@@ -292,8 +293,8 @@ namespace Assets.Scripts
                  !boardStatus[playerStatus[p].x, playerStatus[p].y - 2].hasRightWall)
                 {
                     newBoard = new Board(node.State);
-                    newBoard.MoveLeft(p, 2, 2);
-                    node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveLeft, p, 2, 2), nextPlayer));
+                    Board.MoveLeft(newBoard,p, 2, 2);
+                    node.Children.Add(new Node(newBoard, 0, new ActionFunction(Board.MoveLeft, p, 2, 2), nextPlayer));
                 }
             //}
             //Move Right
@@ -301,8 +302,8 @@ namespace Assets.Scripts
 			 !boardStatus[playerStatus[p].x, playerStatus[p].y].hasRightWall)
             {
                 newBoard = new Board(node.State);
-                newBoard.MoveRight(p, 1, 0);
-                node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveRight, p, 1, 0), nextPlayer));
+                Board.MoveRight(newBoard,p, 1, 0);
+                node.Children.Add(new Node(newBoard, 0, new ActionFunction(Board.MoveRight, p, 1, 0), nextPlayer));
             }
 			//going Right jumping over 1 player directly
 			else if (playerStatus[p].y < 7 &&
@@ -311,16 +312,16 @@ namespace Assets.Scripts
              !boardStatus[playerStatus[p].x, playerStatus[p].y + 1].hasRightWall)
             {
                 newBoard = new Board(node.State);
-                newBoard.MoveRight(p, 2, 0);
-                node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveRight, p, 2, 0), nextPlayer));
+                Board.MoveRight(newBoard,p, 2, 0);
+                node.Children.Add(new Node(newBoard, 0, new ActionFunction(Board.MoveRight, p, 2, 0), nextPlayer));
             }
 
             //Move up
 			if (playerStatus[p].x > 0 &&
 			 !boardStatus[playerStatus[p].x - 1, playerStatus[p].y].hasBotWall)
             {
-                newBoard.MoveUp(p, 1, 1);
-                node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveUp, p, 1, 1), nextPlayer));
+                Board.MoveUp(newBoard,p, 1, 1);
+                node.Children.Add(new Node(newBoard, 0, new ActionFunction(Board.MoveUp, p, 1, 1), nextPlayer));
             }
             else
             {
@@ -331,8 +332,8 @@ namespace Assets.Scripts
                  !boardStatus[playerStatus[p].x - 2, playerStatus[p].y].hasBotWall)
                 {
                     newBoard = new Board(node.State);
-                    newBoard.MoveUp(p, 1, 2);
-                    node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveUp, p, 1, 2), nextPlayer));
+                    Board.MoveUp(newBoard,p, 1, 2);
+                    node.Children.Add(new Node(newBoard, 0, new ActionFunction(Board.MoveUp, p, 1, 2), nextPlayer));
                 }
                 // going Up by 1 and Right by 1
 				if ((playerStatus[p].x > 0 && playerStatus[p].y < 8) && (
@@ -345,8 +346,8 @@ namespace Assets.Scripts
                   !boardStatus[playerStatus[p].x, playerStatus[p].y + 1].isOpen)))
                 {
                     newBoard = new Board(node.State);
-                    newBoard.MoveUp(p, 1, 1, true);
-                    node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveUp, p, 1, 1, true), nextPlayer));
+                    Board.MoveUp(newBoard,p, 1, 1, true);
+                    node.Children.Add(new Node(newBoard, 0, new ActionFunction(Board.MoveUp, p, 1, 1, true), nextPlayer));
                 }
                 //going Left by 1 AND Up by 1
 				if ((playerStatus[p].x > 0 && playerStatus[p].y > 0) && (
@@ -359,37 +360,37 @@ namespace Assets.Scripts
                   !boardStatus[playerStatus[p].x - 1, playerStatus[p].y].isOpen)))
                 {
                     newBoard = new Board(node.State);
-                    newBoard.MoveLeft(p, 1, 2, true);
-                    node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.MoveLeft, p, 1, 2, true), nextPlayer));
+                    Board.MoveLeft(newBoard,p, 1, 2, true);
+                    node.Children.Add(new Node(newBoard, 0, new ActionFunction(Board.MoveLeft, p, 1, 2, true), nextPlayer));
                 }
             }
             #endregion
 
-            #region Wall Generation (for both players)
-            for (int x = 0; x < Board.BOARD_SIZE - 1; x++)
-            {
-                for (int y = 0; y < Board.BOARD_SIZE - 1; y++)
-                {
-                    //Horizontal Wall
-                    if (playerStatus[p].wallsLeft > 0 && node.State.CheckWallH(x, y))
-                    {
-                        newBoard = new Board(node.State);
-                        newBoard.PlaceWallH(x, y);
-                        newBoard.playerStatus[p].wallsLeft--;
-                        node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.PlaceWallH, x, y, -1, true), nextPlayer));
-                    }
+            #region Wall Generation (for both players) taking too long
+            //for (int x = 0; x < Board.BOARD_SIZE - 1; x++)
+            //{
+            //    for (int y = 0; y < Board.BOARD_SIZE - 1; y++)
+            //    {
+            //        //Horizontal Wall
+            //        if (playerStatus[p].wallsLeft > 0 && node.State.CheckWallH(x, y))
+            //        {
+            //            newBoard = new Board(node.State);
+            //            newBoard.PlaceWallH(x, y);
+            //            newBoard.playerStatus[p].wallsLeft--;
+            //            node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.PlaceWallH, x, y, -1, true), nextPlayer));
+            //        }
 
-                    //Vertical Wall
-                    if (playerStatus[p].wallsLeft > 0 && node.State.CheckWallV(x, y))
-                    {
-                        newBoard = new Board(node.State);
-                        newBoard.PlaceWallV(x, y);
-                        newBoard.playerStatus[p].wallsLeft--;
-                        node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.PlaceWallV, x, y, -1 ,false), nextPlayer));
-                    }
+            //        //Vertical Wall
+            //        if (playerStatus[p].wallsLeft > 0 && node.State.CheckWallV(x, y))
+            //        {
+            //            newBoard = new Board(node.State);
+            //            newBoard.PlaceWallV(x, y);
+            //            newBoard.playerStatus[p].wallsLeft--;
+            //            node.Children.Add(new Node(newBoard, 0, new ActionFunction(newBoard.PlaceWallV, x, y, -1 ,false), nextPlayer));
+            //        }
 
-                }
-            }
+            //    }
+            //}
             #endregion
         }
     }
