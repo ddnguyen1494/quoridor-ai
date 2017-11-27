@@ -405,7 +405,8 @@ namespace Assets.Scripts
             // going up by 1 (checks on location and for walls)
             else if (xDiff == -1 && yDiff == 0 &&
                     formerX > 0 &&
-                    !boardStatus[formerX - 1, formerY].hasBotWall)
+                    !boardStatus[formerX - 1, formerY].hasBotWall &&
+                    !boardStatus[formerX -1, formerY].isOpen)
             {
                 return true;
             }
@@ -443,7 +444,8 @@ namespace Assets.Scripts
             // going Left by 1 (checks on location and for walls)
             else if (xDiff == 0 && yDiff == -1 &&
                     formerY > 0 &&
-                    !boardStatus[formerX, formerY - 1].hasRightWall)
+                    !boardStatus[formerX, formerY - 1].hasRightWall &&
+                    !boardStatus[formerX, formerY -1].isOpen)
             {
                 return true;
             }
@@ -487,7 +489,8 @@ namespace Assets.Scripts
             // going Right by 1 (checks on location and for walls)
             else if (xDiff == 0 && yDiff == 1 &&
                 formerY < 8 &&
-                !boardStatus[formerX, formerY].hasRightWall)
+                !boardStatus[formerX, formerY].hasRightWall &&
+                !boardStatus[formerX, formerY+1].isOpen)
             {
                 return true;
             }
