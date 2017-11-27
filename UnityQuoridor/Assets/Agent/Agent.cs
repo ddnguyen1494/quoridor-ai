@@ -81,7 +81,7 @@ namespace Assets.Scripts
             gameSquareInfo[,] boardStatus = node.State.boardStatus;
             WallPeg[,] wallPegStatus = node.State.wallPegStatus;
             int p = node.Player;
-            int nextPlayer = (p + 1) % 1;
+            int nextPlayer = (p + 1) % 2;
             Board newBoard = new Board(node.State);
             #region Player 1's Successors
             if (node.Player == PLAYER1)  //first check in all if statemtents is the players position in relation to moving
@@ -237,7 +237,7 @@ namespace Assets.Scripts
                 }
                 //}
                 //Move Right
-                if (node.State.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, playerStatus[p].x + 1, playerStatus[p].y + 1))
+                if (node.State.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, playerStatus[p].x, playerStatus[p].y + 1))
                 {
                     newBoard = new Board(node.State);
                     Board.MoveRight(newBoard, p, 1, 0);

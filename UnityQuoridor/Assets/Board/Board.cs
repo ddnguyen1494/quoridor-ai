@@ -41,9 +41,9 @@ namespace Assets.Scripts
             playerStatus = new PlayerInfo[numPlayers];
         }
 
-        public Board(Board other) : this (other._numPlayers)
+        public Board(Board other) : this(other._numPlayers)
         {
-            accessible = (int[,]) other.accessible.Clone();
+            accessible = (int[,])other.accessible.Clone();
             for (int i = 0; i < _numPlayers; i++)
             {
                 playerStatus[i] = new PlayerInfo(other.playerStatus[i]);
@@ -52,7 +52,7 @@ namespace Assets.Scripts
             {
                 for (int j = 0; j < BOARD_SIZE; j++)
                 {
-                    if (i < BOARD_SIZE -1 && j < BOARD_SIZE - 1)
+                    if (i < BOARD_SIZE - 1 && j < BOARD_SIZE - 1)
                     {
                         wallPegStatus[i, j] = new WallPeg(other.wallPegStatus[i, j]);
                     }
@@ -209,7 +209,7 @@ namespace Assets.Scripts
 
         }
 
-#endregion
+        #endregion
 
         #region Functions representing player's decision(moving or placing wall)
         //if turn jumping is false it will move either 1 space or 2(jumping directly)
@@ -383,15 +383,15 @@ namespace Assets.Scripts
             }
             // going Down by 1 AND to the Left by 1
             else if ((xDiff == 1 && yDiff == -1) &&
-                    (formerX < 8 && formerY > 0) && 
+                    (formerX < 8 && formerY > 0) &&
                     ((!boardStatus[formerX, formerY].hasBotWall && //going down then left
                      boardStatus[formerX + 1, formerY].hasBotWall &&
                      !boardStatus[formerX + 1, formerY].isOpen)
                     ||
-                    (formerY == 1 && 
+                    (formerY == 1 &&
                     boardStatus[formerX, formerY].hasBotWall &&   //special case of left then down
-                    !boardStatus[formerX, formerY-1].isOpen &&
-                    !boardStatus[formerX, formerY - 1].hasBotWall)  
+                    !boardStatus[formerX, formerY - 1].isOpen &&
+                    !boardStatus[formerX, formerY - 1].hasBotWall)
                     ||
                   (formerY != 1 &&
                   !boardStatus[formerX, formerY - 1].hasRightWall && //going left then down
@@ -404,12 +404,14 @@ namespace Assets.Scripts
             // UP-----------------------------------------------------------------------
             // going up by 1 (checks on location and for walls)
             else if (xDiff == -1 && yDiff == 0 &&
-             !boardStatus[formerX - 1, formerY].hasBotWall)
+                    formerX > 0 &&
+                    !boardStatus[formerX - 1, formerY].hasBotWall)
             {
                 return true;
             }
             // going up jumping over 1 player directly
             else if (xDiff == -2 && yDiff == 0 &&
+                formerX > 1 &&
              !boardStatus[formerX - 1, formerY].hasBotWall &&
              !boardStatus[formerX - 1, formerY].isOpen &&
              !boardStatus[formerX - 2, formerY].hasBotWall)
@@ -417,8 +419,9 @@ namespace Assets.Scripts
                 return true;
             }
             // going Up by 1 AND Right by 1
-            else if (xDiff == -1 && yDiff == 1 && (
-                (formerX == 1 &&                                //special case of up then right
+            else if (xDiff == -1 && yDiff == 1 &&
+                formerX > 0 && formerY < 8 &&
+                ((formerX == 1 &&                                //special case of up then right
                 !boardStatus[formerX - 1, formerY].hasBotWall &&
                 !boardStatus[formerX - 1, formerY].isOpen &&
                 !boardStatus[formerX - 1, formerY].hasRightWall)
@@ -439,33 +442,36 @@ namespace Assets.Scripts
             // LEFT-----------------------------------------------------------------------
             // going Left by 1 (checks on location and for walls)
             else if (xDiff == 0 && yDiff == -1 &&
-             !boardStatus[formerX, formerY - 1].hasRightWall)
+                    formerY > 0 &&
+                    !boardStatus[formerX, formerY - 1].hasRightWall)
             {
                 return true;
             }
             // going Left jumping over 1 player directly
             else if (xDiff == 0 && yDiff == -2 &&
-             !boardStatus[formerX, formerY - 1].hasRightWall &&
-             !boardStatus[formerX, formerY - 1].isOpen &&
-             !boardStatus[formerX, formerY - 2].hasRightWall)
+                     formerY > 1 &&
+                     !boardStatus[formerX, formerY - 1].hasRightWall &&
+                     !boardStatus[formerX, formerY - 1].isOpen &&
+                     !boardStatus[formerX, formerY - 2].hasRightWall)
             {
                 return true;
             }
             //going Left by 1 AND Up by 1
             else if (xDiff == -1 && yDiff == -1 &&
-                ((formerY ==1 &&                                    //special case of left then up
-                !boardStatus[formerX, formerY -1].hasRightWall &&
-                !boardStatus[formerX, formerY -1].isOpen &&
+                (formerX > 0 && formerY > 0) &&
+                ((formerY == 1 &&                                    //special case of left then up
+                !boardStatus[formerX, formerY - 1].hasRightWall &&
+                !boardStatus[formerX, formerY - 1].isOpen &&
                 !boardStatus[newX, newY].hasBotWall)
                 ||
                 (formerY != 1 &&
                 !boardStatus[formerX, formerY - 1].hasRightWall && //going left then up
                 boardStatus[formerX, formerY - 2].hasRightWall &&
                 !boardStatus[formerX, formerY - 1].isOpen)
-                || 
+                ||
                 (formerX == 1 &&                                    //special case of 
                 !boardStatus[formerX, formerY - 1].hasBotWall &&
-                !boardStatus[formerX, formerY -1].isOpen &&
+                !boardStatus[formerX, formerY - 1].isOpen &&
                 !boardStatus[newX, newY].hasRightWall)
                 ||
                 (formerX != 1 &&
@@ -480,19 +486,23 @@ namespace Assets.Scripts
             // RIGHT-----------------------------------------------------------------------
             // going Right by 1 (checks on location and for walls)
             else if (xDiff == 0 && yDiff == 1 &&
-             !boardStatus[formerX, formerY].hasRightWall)
+                formerY < 8 &&
+                !boardStatus[formerX, formerY].hasRightWall)
             {
                 return true;
             }
+            ////going Right by jumping over 1 player directly
             else if (xDiff == 0 && yDiff == 2 &&
-             !boardStatus[formerX, formerY].hasRightWall &&
-             !boardStatus[formerX, formerY + 1].isOpen &&
-             !boardStatus[formerX, formerY + 1].hasRightWall)
+                formerY < 7 &&
+                !boardStatus[formerX, formerY].hasRightWall &&
+                !boardStatus[formerX, formerY + 1].isOpen &&
+                 !boardStatus[formerX, formerY + 1].hasRightWall)
             {
                 return true;
             }
             // going Right by 1 AND Down by 1
             else if (xDiff == 1 && yDiff == 1 &&
+                (formerX < 8 && formerY < 8) &&
              ((!boardStatus[formerX, formerY].hasRightWall && //going Right then Down
                 boardStatus[formerX, formerY + 1].hasRightWall &&
                !boardStatus[formerX, formerY + 1].isOpen)
@@ -504,6 +514,23 @@ namespace Assets.Scripts
                 return true;
             }
             return false;
+        }
+
+        //Check if there is a wall blocking the move
+        public bool IsPawnMoveLegalSimplified(int formerX, int formerY, int newX, int newY)
+        {
+            int diffX = newX - formerX;
+            int diffY = newY - formerY;
+            if (diffX == 1 && diffY == 0)
+                return CanMoveDown(formerX, formerY);
+            else if (diffX == -1 && diffY == 0)
+                return CanMoveUp(formerX, formerY);
+            else if (diffX == 0 && diffY == -1)
+                return CanMoveLeft(formerX, formerY);
+            else if (diffX == 0 && diffY == 1)
+                return CanMoveRight(formerX, formerY);
+            else
+                return false;   //shouldn't get here
         }
     }
 }

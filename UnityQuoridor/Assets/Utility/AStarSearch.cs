@@ -73,10 +73,10 @@ namespace Assets.Utility
                         (pos.Y >= 0 && pos.Y < Board.BOARD_SIZE) &&
                         visited[pos.X, pos.Y] == false &&
                         !open.Contains(temp) &&
-                        node.State.IsPawnMoveLegal(x, y, pos.X, pos.Y))
+                        node.State.IsPawnMoveLegalSimplified(x, y, pos.X, pos.Y))
                         open.Enqueue(temp, F(temp));
                 }
-            }
+            } 
             return -1;
         }
     }
