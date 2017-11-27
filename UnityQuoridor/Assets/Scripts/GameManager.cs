@@ -599,7 +599,6 @@ public class GameManager : MonoBehaviour {
             wallsRemainText.text += "Player " + (i + 1) + "'s Walls: " + playerStatus[i].wallsLeft + "\n";
         }
     }
-
     #region Moved to Board class
     ////if turn jumping is false it will move either 1 space or 2(jumping directly)
     ////if turn jumping is true it will move down and left

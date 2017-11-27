@@ -27,10 +27,9 @@ namespace Assets.Scripts
                 node.Value = Agent.Evaluate(node);
                 return new ValueAndAction(node.Value, node.Action);
             }
-            int tempVal = int.MaxValue;
+            int tempVal = int.MinValue;
             ActionFunction tempAction = new ActionFunction();
-            if (node.Children.Count == 0) //Only generate successors if haven't done so
-                Agent.GenerateSuccessors(node);
+            Agent.GenerateSuccessors(node);
             foreach (Node child in node.Children)
             {
                 var retValAction = MinValue(child, ref alpha, ref beta, depth + 1);
@@ -56,8 +55,7 @@ namespace Assets.Scripts
             }
             int tempVal = int.MaxValue;
             ActionFunction tempAction = new ActionFunction();
-            if (node.Children.Count == 0) //Only generate successors if haven't done so
-                Agent.GenerateSuccessors(node);
+            Agent.GenerateSuccessors(node);
             foreach (Node child in node.Children)
             {
                 var retValAction = MaxValue(child, ref alpha, ref beta, depth + 1);
@@ -77,7 +75,7 @@ namespace Assets.Scripts
         {
             int alpha = int.MinValue;
             int beta = int.MaxValue;
-            return MinValue(root, ref alpha, ref beta, 0).action;
+            return MaxValue(root, ref alpha, ref beta, 0).action;
         }
     }
 }

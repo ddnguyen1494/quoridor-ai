@@ -359,37 +359,151 @@ namespace Assets.Scripts
         }
         #endregion
 
-        //public void SetWallPegStatus(int i, int j, WallPeg peg)
-        //{
-        //    wallPegStatus[i, j] = peg;
-        //    wallPegStatus[i, j].x = i;
-        //    wallPegStatus[i, j].y = j;
-        //}
+        public bool IsPawnMoveLegal(int formerX, int formerY, int newX, int newY)
+        {
+            int xDiff = newX - formerX;
+            int yDiff = newY - formerY;
+            // DOWN-----------------------------------------------------------
+            // going down by 1 (checks on location and for walls)
+            if (xDiff == 1 && yDiff == 0 &&
+                formerX < 8 &&
+                !boardStatus[formerX, formerY].hasBotWall &&
+                boardStatus[formerX + 1, formerY].isOpen)
+            {
+                return true;
+            }
+            // going down jumping over 1 player directly
+            else if (xDiff == 2 && yDiff == 0 &&
+                    formerX < 7 &&
+                    !boardStatus[formerX, formerY].hasBotWall &&
+                    !boardStatus[formerX + 1, formerY].isOpen &&
+                    !boardStatus[formerX + 1, formerY].hasBotWall)
+            {
+                return true;
+            }
+            // going Down by 1 AND to the Left by 1
+            else if ((xDiff == 1 && yDiff == -1) &&
+                    (formerX < 8 && formerY > 0) && 
+                    ((!boardStatus[formerX, formerY].hasBotWall && //going down then left
+                     boardStatus[formerX + 1, formerY].hasBotWall &&
+                     !boardStatus[formerX + 1, formerY].isOpen)
+                    ||
+                    (formerY == 1 && 
+                    boardStatus[formerX, formerY].hasBotWall &&   //special case of left then down
+                    !boardStatus[formerX, formerY-1].isOpen &&
+                    !boardStatus[formerX, formerY - 1].hasBotWall)  
+                    ||
+                  (formerY != 1 &&
+                  !boardStatus[formerX, formerY - 1].hasRightWall && //going left then down
+                    boardStatus[formerX, formerY - 2].hasRightWall &&
+                   !boardStatus[formerX, formerY - 1].isOpen)))
+            {
+                return true;
+            }
 
-        //public void SetBoardStatus(int i, int j, gameSquareInfo info, Vector3 currentPos)
-        //{
-        //    boardStatus[i, j] = info;
-        //    boardStatus[i, j].location = currentPos;
-        //    boardStatus[i, j].x = i;
-        //    boardStatus[i, j].y = j;
-        //}
+            // UP-----------------------------------------------------------------------
+            // going up by 1 (checks on location and for walls)
+            else if (xDiff == -1 && yDiff == 0 &&
+             !boardStatus[formerX - 1, formerY].hasBotWall)
+            {
+                return true;
+            }
+            // going up jumping over 1 player directly
+            else if (xDiff == -2 && yDiff == 0 &&
+             !boardStatus[formerX - 1, formerY].hasBotWall &&
+             !boardStatus[formerX - 1, formerY].isOpen &&
+             !boardStatus[formerX - 2, formerY].hasBotWall)
+            {
+                return true;
+            }
+            // going Up by 1 AND Right by 1
+            else if (xDiff == -1 && yDiff == 1 && (
+                (formerX == 1 &&                                //special case of up then right
+                !boardStatus[formerX - 1, formerY].hasBotWall &&
+                !boardStatus[formerX - 1, formerY].isOpen &&
+                !boardStatus[formerX - 1, formerY].hasRightWall)
+                ||
+                (formerX != 1 &&
+                !boardStatus[formerX - 1, formerY].hasBotWall && //going up then Right
+                   boardStatus[formerX - 2, formerY].hasBotWall &&
+                  !boardStatus[formerX - 1, formerY].isOpen)
+                  ||
+                 (!boardStatus[formerX, formerY].hasRightWall && //going Right then Up
+                   boardStatus[formerX, formerY + 1].hasRightWall &&
+                  !boardStatus[formerX, formerY + 1].isOpen)))
+            {
+                return true;
 
-        //public void SetPlayerStatus(int i, PlayerInfo info, GameObject body)
-        //{
-        //    playerStatus[i] = info; // Reference to playerInfo script
-        //    playerStatus[i].body = body;
-        //    playerStatus[i] = playerStatus[i].body.GetComponent<PlayerInfo>();
-        //    playerStatus[i].body = body;
-        //    playerStatus[i].id = i + 1;
-        //}
-        //public void SetPlayerStartInformation(int index, Vector3 spawnPoint, int x , int y, int goalX , int goalY. bool isOpen)
-        //{
-        //    playerStatus[index].transform.position = playerStatus[0].spawnPoint;
-        //    playerStatus[index].x = 8;
-        //    playerStatus[index].y = 4;
-        //    playerStatus[index].goalX = 0;
-        //    playerStatus[index].goalY = -1;
-        //    boardStatus[8, 4].isOpen = false;
-        //}
+            }
+
+            // LEFT-----------------------------------------------------------------------
+            // going Left by 1 (checks on location and for walls)
+            else if (xDiff == 0 && yDiff == -1 &&
+             !boardStatus[formerX, formerY - 1].hasRightWall)
+            {
+                return true;
+            }
+            // going Left jumping over 1 player directly
+            else if (xDiff == 0 && yDiff == -2 &&
+             !boardStatus[formerX, formerY - 1].hasRightWall &&
+             !boardStatus[formerX, formerY - 1].isOpen &&
+             !boardStatus[formerX, formerY - 2].hasRightWall)
+            {
+                return true;
+            }
+            //going Left by 1 AND Up by 1
+            else if (xDiff == -1 && yDiff == -1 &&
+                ((formerY ==1 &&                                    //special case of left then up
+                !boardStatus[formerX, formerY -1].hasRightWall &&
+                !boardStatus[formerX, formerY -1].isOpen &&
+                !boardStatus[newX, newY].hasBotWall)
+                ||
+                (formerY != 1 &&
+                !boardStatus[formerX, formerY - 1].hasRightWall && //going left then up
+                boardStatus[formerX, formerY - 2].hasRightWall &&
+                !boardStatus[formerX, formerY - 1].isOpen)
+                || 
+                (formerX == 1 &&                                    //special case of 
+                !boardStatus[formerX, formerY - 1].hasBotWall &&
+                !boardStatus[formerX, formerY -1].isOpen &&
+                !boardStatus[newX, newY].hasRightWall)
+                ||
+                (formerX != 1 &&
+                !boardStatus[formerX - 1, formerY].hasBotWall && //going up then left
+                boardStatus[formerX - 2, formerY].hasBotWall &&
+                !boardStatus[formerX - 1, formerY].isOpen)))
+            {
+                return true;
+
+            }
+
+            // RIGHT-----------------------------------------------------------------------
+            // going Right by 1 (checks on location and for walls)
+            else if (xDiff == 0 && yDiff == 1 &&
+             !boardStatus[formerX, formerY].hasRightWall)
+            {
+                return true;
+            }
+            else if (xDiff == 0 && yDiff == 2 &&
+             !boardStatus[formerX, formerY].hasRightWall &&
+             !boardStatus[formerX, formerY + 1].isOpen &&
+             !boardStatus[formerX, formerY + 1].hasRightWall)
+            {
+                return true;
+            }
+            // going Right by 1 AND Down by 1
+            else if (xDiff == 1 && yDiff == 1 &&
+             ((!boardStatus[formerX, formerY].hasRightWall && //going Right then Down
+                boardStatus[formerX, formerY + 1].hasRightWall &&
+               !boardStatus[formerX, formerY + 1].isOpen)
+               ||
+              (!boardStatus[formerX, formerY].hasBotWall && //going Down then Right
+                boardStatus[formerX + 1, formerY].hasBotWall &&
+               !boardStatus[formerX + 1, formerY].isOpen)))
+            {
+                return true;
+            }
+            return false;
+        }
     }
 }
