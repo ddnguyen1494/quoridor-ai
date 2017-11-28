@@ -384,19 +384,27 @@ namespace Assets.Scripts
             // going Down by 1 AND to the Left by 1
             else if ((xDiff == 1 && yDiff == -1) &&
                     (formerX < 8 && formerY > 0) &&
-                    ((!boardStatus[formerX, formerY].hasBotWall && //going down then left
+                    ((formerX != 7 &&
+                    !boardStatus[formerX, formerY].hasBotWall &&    //special case of down then left
+                     !boardStatus[formerX + 1, formerY].isOpen &&
+                    !boardStatus[newX, newY].hasRightWall)
+                    ||
+                    (formerX != 7 &&                                //going down then left
+                    !boardStatus[formerX, formerY].hasBotWall &&
                      boardStatus[formerX + 1, formerY].hasBotWall &&
-                     !boardStatus[formerX + 1, formerY].isOpen)
+                     !boardStatus[formerX + 1, formerY].isOpen &&
+                    !boardStatus[newX, newY].hasRightWall)
                     ||
                     (formerY == 1 &&
-                    boardStatus[formerX, formerY].hasBotWall &&   //special case of left then down
+                    !boardStatus[formerX, formerY - 1].hasRightWall &&   //special case of left then down
                     !boardStatus[formerX, formerY - 1].isOpen &&
-                    !boardStatus[formerX, formerY - 1].hasBotWall)
+                   !boardStatus[formerX, formerY - 1].hasBotWall)
                     ||
                   (formerY != 1 &&
                   !boardStatus[formerX, formerY - 1].hasRightWall && //going left then down
                     boardStatus[formerX, formerY - 2].hasRightWall &&
-                   !boardStatus[formerX, formerY - 1].isOpen)))
+                   !boardStatus[formerX, formerY - 1].isOpen &&
+                   !boardStatus[formerX, formerY - 1].hasBotWall)))
             {
                 return true;
             }
@@ -406,7 +414,7 @@ namespace Assets.Scripts
             else if (xDiff == -1 && yDiff == 0 &&
                     formerX > 0 &&
                     !boardStatus[formerX - 1, formerY].hasBotWall &&
-                    !boardStatus[formerX -1, formerY].isOpen)
+                    !boardStatus[formerX - 1, formerY].isOpen)
             {
                 return true;
             }
@@ -430,11 +438,20 @@ namespace Assets.Scripts
                 (formerX != 1 &&
                 !boardStatus[formerX - 1, formerY].hasBotWall && //going up then Right
                    boardStatus[formerX - 2, formerY].hasBotWall &&
-                  !boardStatus[formerX - 1, formerY].isOpen)
+                  !boardStatus[formerX - 1, formerY].isOpen &&
+                  !boardStatus[formerX - 1, formerY].hasRightWall)
                   ||
-                 (!boardStatus[formerX, formerY].hasRightWall && //going Right then Up
+                  (formerY == 7 &&                              //special case of right then up
+                  !boardStatus[formerX, formerY].hasRightWall &&
+                  !boardStatus[formerX, formerY + 1].isOpen &&
+                  !boardStatus[formerX - 1, formerY + 1].hasBotWall
+                  )
+                  ||
+                 (formerY != 7 &&
+                 !boardStatus[formerX, formerY].hasRightWall && //going Right then Up
                    boardStatus[formerX, formerY + 1].hasRightWall &&
-                  !boardStatus[formerX, formerY + 1].isOpen)))
+                  !boardStatus[formerX, formerY + 1].isOpen &&
+                   !boardStatus[formerX - 1, formerY + 1].hasBotWall)))
             {
                 return true;
 
@@ -445,7 +462,7 @@ namespace Assets.Scripts
             else if (xDiff == 0 && yDiff == -1 &&
                     formerY > 0 &&
                     !boardStatus[formerX, formerY - 1].hasRightWall &&
-                    !boardStatus[formerX, formerY -1].isOpen)
+                    !boardStatus[formerX, formerY - 1].isOpen)
             {
                 return true;
             }
@@ -469,17 +486,19 @@ namespace Assets.Scripts
                 (formerY != 1 &&
                 !boardStatus[formerX, formerY - 1].hasRightWall && //going left then up
                 boardStatus[formerX, formerY - 2].hasRightWall &&
-                !boardStatus[formerX, formerY - 1].isOpen)
-                ||
-                (formerX == 1 &&                                    //special case of 
-                !boardStatus[formerX, formerY - 1].hasBotWall &&
                 !boardStatus[formerX, formerY - 1].isOpen &&
+                !boardStatus[newX, newY].hasBotWall)
+                ||
+                (formerX == 1 &&                                    //special case of up then left
+                !boardStatus[formerX - 1, formerY].hasBotWall &&
+                !boardStatus[formerX - 1, formerY].isOpen &&
                 !boardStatus[newX, newY].hasRightWall)
                 ||
                 (formerX != 1 &&
                 !boardStatus[formerX - 1, formerY].hasBotWall && //going up then left
                 boardStatus[formerX - 2, formerY].hasBotWall &&
-                !boardStatus[formerX - 1, formerY].isOpen)))
+                !boardStatus[formerX - 1, formerY].isOpen &&
+                !boardStatus[newX, newY].hasRightWall)))
             {
                 return true;
 
@@ -490,7 +509,7 @@ namespace Assets.Scripts
             else if (xDiff == 0 && yDiff == 1 &&
                 formerY < 8 &&
                 !boardStatus[formerX, formerY].hasRightWall &&
-                !boardStatus[formerX, formerY+1].isOpen)
+                !boardStatus[formerX, formerY + 1].isOpen)
             {
                 return true;
             }
@@ -506,13 +525,26 @@ namespace Assets.Scripts
             // going Right by 1 AND Down by 1
             else if (xDiff == 1 && yDiff == 1 &&
                 (formerX < 8 && formerY < 8) &&
-             ((!boardStatus[formerX, formerY].hasRightWall && //going Right then Down
+             ((formerY == 7 &&         //special case of right then down
+             !boardStatus[formerX, formerY].hasRightWall &&
+             !boardStatus[formerX, formerY + 1].isOpen &&
+             !boardStatus[formerX, formerY + 1].hasBotWall)
+             ||
+             (formerY != 7 &&
+             !boardStatus[formerX, formerY].hasRightWall && //going Right then Down
                 boardStatus[formerX, formerY + 1].hasRightWall &&
-               !boardStatus[formerX, formerY + 1].isOpen)
+               !boardStatus[formerX, formerY + 1].isOpen &&
+               !boardStatus[formerX, formerY + 1].hasBotWall)
+               ||
+               (formerX == 7 &&                             //special case of down then right.
+               !boardStatus[formerX, formerY].hasBotWall &&
+               !boardStatus[formerX + 1, formerY].isOpen &&
+               !boardStatus[formerX + 1, formerY].hasRightWall)
                ||
               (!boardStatus[formerX, formerY].hasBotWall && //going Down then Right
                 boardStatus[formerX + 1, formerY].hasBotWall &&
-               !boardStatus[formerX + 1, formerY].isOpen)))
+               !boardStatus[formerX + 1, formerY].isOpen &&
+               !boardStatus[formerX + 1, formerY].hasRightWall)))
             {
                 return true;
             }
