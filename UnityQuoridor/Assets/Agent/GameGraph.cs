@@ -6,17 +6,20 @@ namespace Assets.Scripts
     public struct ActionFunction
     {
         public Board.Action function;
-        public int param1;
-        public int param2;
-        public int param3;
-        public bool param4;
-        public ActionFunction(Board.Action fnc, int param1, int param2, int param3 = -1, bool param4 = false)
+        public int player;
+        public int x;
+        public int y;
+
+        /// <summary>
+        /// This struct stores the function that a player should make with 
+        /// the corresponding x and y
+        /// </summary>
+        public ActionFunction(Board.Action fnc, int player, int x, int y)
         {
             this.function = fnc;
-            this.param1 = param1;
-            this.param2 = param2;
-            this.param3 = param3;
-            this.param4 = param4;
+            this.player = player;
+            this.x = x;
+            this.y = y;
         }
     }
     internal class Node

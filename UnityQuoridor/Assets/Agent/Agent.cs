@@ -75,78 +75,78 @@ namespace Assets.Scripts
             WallPeg[,] wallPegStatus = board.wallPegStatus;
             int p = node.Player;
             int nextPlayer = (p + 1) % 2;
-            ActionFunction UndoMovement = new ActionFunction(Board.UndoMove, p, playerStatus[p].x, playerStatus[p].y);
+            ActionFunction undo = new ActionFunction(Board.UndoMovePawn, p, playerStatus[p].x, playerStatus[p].y);
             #region Player 1's Successors
             if (node.Player == PLAYER1)  //first check in all if statemtents is the players position in relation to moving
             {
                 //Move up
                 if (board.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, playerStatus[p].x - 1, playerStatus[p].y))
                 {
-                    node.Children.Add(new Node(new ActionFunction(Board.MoveUp, p, 1, 1), UndoMovement, nextPlayer));
+                    node.Children.Add(new Node(new ActionFunction(Board.MovePawn, p, playerStatus[p].x - 1, playerStatus[p].y), undo, nextPlayer));
                 }
                 else
                 {
                     // going up jumping over 1 player directly
                     if (board.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, playerStatus[p].x - 2, playerStatus[p].y))
                     {
-                        node.Children.Add(new Node(new ActionFunction(Board.MoveUp, p, 1, 2), UndoMovement, nextPlayer));
+                        node.Children.Add(new Node(new ActionFunction(Board.MovePawn, p, playerStatus[p].x - 2, playerStatus[p].y), undo, nextPlayer));
                     }
                     // going Up by 1 and Right by 1
                     if (board.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, playerStatus[p].x - 1, playerStatus[p].y + 1))
                     {
-                        node.Children.Add(new Node(new ActionFunction(Board.MoveUp, p, 1, 1, true), UndoMovement, nextPlayer));
+                        node.Children.Add(new Node(new ActionFunction(Board.MovePawn, p, playerStatus[p].x - 1, playerStatus[p].y + 1), undo, nextPlayer));
                     }
                     //going Left by 1 AND Up by 1
                     if (board.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, playerStatus[p].x - 1, playerStatus[p].y - 1))
                     {
-                        node.Children.Add(new Node(new ActionFunction(Board.MoveLeft, p, 1, 2, true), UndoMovement, nextPlayer));
+                        node.Children.Add(new Node(new ActionFunction(Board.MovePawn, p, playerStatus[p].x - 1, playerStatus[p].y - 1), undo, nextPlayer));
                     }
                 }
 
                 //Move Left
                 if (board.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, playerStatus[p].x, playerStatus[p].y - 1))
                 {
-                    node.Children.Add(new Node(new ActionFunction(Board.MoveLeft, p, 1, 2), UndoMovement, nextPlayer));
+                    node.Children.Add(new Node(new ActionFunction(Board.MovePawn, p, playerStatus[p].x, playerStatus[p].y - 1), undo, nextPlayer));
                 }
                 // going Left jumping over 1 player directly
                 else if (board.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, playerStatus[p].x, playerStatus[p].y - 2))
                 {
-                    node.Children.Add(new Node(new ActionFunction(Board.MoveLeft, p, 2, 2), UndoMovement, nextPlayer));
+                    node.Children.Add(new Node(new ActionFunction(Board.MovePawn, p, playerStatus[p].x, playerStatus[p].y - 2), undo, nextPlayer));
                 }
 
                 //Move Right
                 if (board.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, playerStatus[p].x, playerStatus[p].y + 1))
                 {
-                    node.Children.Add(new Node(new ActionFunction(Board.MoveRight, p, 1, 0), UndoMovement, nextPlayer));
+                    node.Children.Add(new Node(new ActionFunction(Board.MovePawn, p, playerStatus[p].x, playerStatus[p].y + 1), undo, nextPlayer));
                 }
                 //going Right by jumping over 1 player directly
                 else if (board.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, playerStatus[p].x, playerStatus[p].y + 2))
                 {
-                    node.Children.Add(new Node(new ActionFunction(Board.MoveRight, p, 2, 0), UndoMovement, nextPlayer));
+                    node.Children.Add(new Node(new ActionFunction(Board.MovePawn, p, playerStatus[p].x, playerStatus[p].y + 2), undo, nextPlayer));
                 }
 
                 //Move Down
                 // going down by 1 (checks on location and for walls)
                 if (board.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, playerStatus[p].x + 1, playerStatus[p].y))
                 {
-                    node.Children.Add(new Node(new ActionFunction(Board.MoveDown, p, 1, 3), UndoMovement, nextPlayer));
+                    node.Children.Add(new Node(new ActionFunction(Board.MovePawn, p, playerStatus[p].x + 1, playerStatus[p].y), undo, nextPlayer));
                 }
                 else
                 {
                     // going down jumping over 1 player directly
                     if (board.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, playerStatus[p].x + 2, playerStatus[p].y))
                     {
-                        node.Children.Add(new Node(new ActionFunction(Board.MoveDown, p, 2, 3), UndoMovement, nextPlayer));
+                        node.Children.Add(new Node(new ActionFunction(Board.MovePawn, p, playerStatus[p].x + 2, playerStatus[p].y), undo, nextPlayer));
                     }
                     // going Down by 1 AND to the Left by 1
                     if (board.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, playerStatus[p].x + 1, playerStatus[p].y - 1))
                     {
-                        node.Children.Add(new Node(new ActionFunction(Board.MoveDown, p, 1, 3, true), UndoMovement, nextPlayer));
+                        node.Children.Add(new Node(new ActionFunction(Board.MovePawn, p, playerStatus[p].x + 1, playerStatus[p].y - 1), undo, nextPlayer));
                     }
                     // going Right by 1 AND Down by 1
                     if (board.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, playerStatus[p].x - 1, playerStatus[p].y + 1))
                     {
-                        node.Children.Add(new Node(new ActionFunction(Board.MoveRight, p, 1, 0, true), UndoMovement, nextPlayer));
+                        node.Children.Add(new Node(new ActionFunction(Board.MovePawn, p, playerStatus[p].x - 1, playerStatus[p].y + 1), undo, nextPlayer));
                     }
                 }
             }
@@ -159,24 +159,24 @@ namespace Assets.Scripts
                 // going down by 1 (checks on location and for walls)
                 if (board.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, playerStatus[p].x + 1, playerStatus[p].y))
                 {
-                    node.Children.Add(new Node(new ActionFunction(Board.MoveDown, p, 1, 3), UndoMovement, nextPlayer));
+                    node.Children.Add(new Node(new ActionFunction(Board.MovePawn, p, playerStatus[p].x + 1, playerStatus[p].y), undo, nextPlayer));
                 }
                 else
                 {
                     // going down jumping over 1 player directly
                     if (board.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, playerStatus[p].x + 2, playerStatus[p].y))
                     {
-                        node.Children.Add(new Node(new ActionFunction(Board.MoveDown, p, 2, 3), UndoMovement, nextPlayer));
+                        node.Children.Add(new Node(new ActionFunction(Board.MovePawn, p, playerStatus[p].x + 2, playerStatus[p].y), undo, nextPlayer));
                     }
                     // going Down by 1 AND to the Left by 1
                     if (board.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, playerStatus[p].x + 1, playerStatus[p].y -1))
                     {
-                        node.Children.Add(new Node(new ActionFunction(Board.MoveDown, p, 1, 3, true), UndoMovement, nextPlayer));
+                        node.Children.Add(new Node(new ActionFunction(Board.MovePawn, p, playerStatus[p].x + 1, playerStatus[p].y - 1), undo, nextPlayer));
                     }
                     // going Right by 1 AND Down by 1
                     if (board.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, playerStatus[p].x + 1, playerStatus[p].y + 1))
                     {
-                        node.Children.Add(new Node(new ActionFunction(Board.MoveRight, p, 1, 0, true), UndoMovement, nextPlayer));
+                        node.Children.Add(new Node(new ActionFunction(Board.MovePawn, p, playerStatus[p].x + 1, playerStatus[p].y + 1), undo, nextPlayer));
                     }
                 }
 
@@ -186,46 +186,46 @@ namespace Assets.Scripts
                 //  {
                 if (board.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, playerStatus[p].x, playerStatus[p].y -1))
                 {
-                    node.Children.Add(new Node(new ActionFunction(Board.MoveLeft, p, 1, 2), UndoMovement, nextPlayer));
+                    node.Children.Add(new Node(new ActionFunction(Board.MovePawn, p, playerStatus[p].x, playerStatus[p].y - 1), undo, nextPlayer));
                 }
                 // going Left jumping over 1 player directly
                 else if (board.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, playerStatus[p].x, playerStatus[p].y - 2))
                 {
-                    node.Children.Add(new Node(new ActionFunction(Board.MoveLeft, p, 2, 2), UndoMovement, nextPlayer));
+                    node.Children.Add(new Node(new ActionFunction(Board.MovePawn, p, playerStatus[p].x, playerStatus[p].y - 2), undo, nextPlayer));
                 }
                 //}
                 //Move Right
                 if (board.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, playerStatus[p].x, playerStatus[p].y + 1))
                 {
-                    node.Children.Add(new Node(new ActionFunction(Board.MoveRight, p, 1, 0), UndoMovement, nextPlayer));
+                    node.Children.Add(new Node(new ActionFunction(Board.MovePawn, p, playerStatus[p].x, playerStatus[p].y + 1), undo, nextPlayer));
                 }
                 //going Right jumping over 1 player directly
                 else if (board.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, playerStatus[p].x, playerStatus[p].y + 2))
                 {
-                    node.Children.Add(new Node(new ActionFunction(Board.MoveRight, p, 2, 0), UndoMovement, nextPlayer));
+                    node.Children.Add(new Node(new ActionFunction(Board.MovePawn, p, playerStatus[p].x, playerStatus[p].y + 2), undo, nextPlayer));
                 }
 
                 //Move up
                 if (board.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, playerStatus[p].x - 1, playerStatus[p].y))
                 {
-                    node.Children.Add(new Node(new ActionFunction(Board.MoveUp, p, 1, 1), UndoMovement, nextPlayer));
+                    node.Children.Add(new Node(new ActionFunction(Board.MovePawn, p, playerStatus[p].x - 1, playerStatus[p].y), undo, nextPlayer));
                 }
                 else
                 {
                     // going up jumping over 1 player directly
                     if (board.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, playerStatus[p].x - 2, playerStatus[p].y))
                     {
-                        node.Children.Add(new Node(new ActionFunction(Board.MoveUp, p, 1, 2), UndoMovement, nextPlayer));
+                        node.Children.Add(new Node(new ActionFunction(Board.MovePawn, p, playerStatus[p].x - 2, playerStatus[p].y), undo, nextPlayer));
                     }
                     // going Up by 1 and Right by 1
                     if (board.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, playerStatus[p].x - 1, playerStatus[p].y + 1))
                     {
-                        node.Children.Add(new Node(new ActionFunction(Board.MoveUp, p, 1, 1, true), UndoMovement, nextPlayer));
+                        node.Children.Add(new Node(new ActionFunction(Board.MovePawn, p, playerStatus[p].x - 1, playerStatus[p].y + 1), undo, nextPlayer));
                     }
                     //going Left by 1 AND Up by 1
                     if (board.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, playerStatus[p].x - 1, playerStatus[p].y -1))
                     {
-                        node.Children.Add(new Node(new ActionFunction(Board.MoveLeft, p, 1, 2, true), UndoMovement, nextPlayer));
+                        node.Children.Add(new Node(new ActionFunction(Board.MovePawn, p, playerStatus[p].x - 1, playerStatus[p].y - 1), undo, nextPlayer));
                     }
                 }
             }
@@ -243,14 +243,14 @@ namespace Assets.Scripts
                     //Horizontal Wall
                     if (board.CheckWallH(x, y))
                     {
-                        undoWall = new ActionFunction(board.RemoveWallH, x, y, p, true);
-                        node.Children.Add(new Node(new ActionFunction(board.PlaceWallH, x, y, -1, true), undoWall, nextPlayer));
+                        undoWall = new ActionFunction(Board.UndoPlaceHorizontalWall, p, x, y);
+                        node.Children.Add(new Node(new ActionFunction(Board.PlaceHorizontalWall, p, x, y), undoWall, nextPlayer));
                     }
                     //Vertical Wall
                     if (board.CheckWallV(x, y))
                     {
-                        undoWall = new ActionFunction(board.RemoveWallV, x, y, p, false);
-                        node.Children.Add(new Node(new ActionFunction(board.PlaceWallV, x, y, -1, false), UndoMovement, nextPlayer));
+                        undoWall = new ActionFunction(Board.UndoPlaceVerticalWall, p, x, y);
+                        node.Children.Add(new Node(new ActionFunction(Board.PlaceVerticalWall, p, x, y), undoWall, nextPlayer));
                     }
 
                 }
