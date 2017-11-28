@@ -49,13 +49,13 @@ namespace Assets.Utility
         {
             return node.PathCost + Math.Abs(node.Pos.X - GOAL);
         }
-        public static int FindShortestPathLength(Node node, int player)
+        public static int FindShortestPathLength(Board board, Node node, int player)
         {
             SimplePriorityQueue<QueueNode> open = new SimplePriorityQueue<QueueNode>();
 
             bool[,] visited = new bool[Board.BOARD_SIZE, Board.BOARD_SIZE];
-            GOAL = node.State.playerStatus[player].goalX;
-            QueueNode root = new QueueNode(node.State.playerStatus[player].x, node.State.playerStatus[player].y, 0);
+            GOAL = board.playerStatus[player].goalX;
+            QueueNode root = new QueueNode(board.playerStatus[player].x, board.playerStatus[player].y, 0);
             open.Enqueue(root, F(root));
 
             while (open.Count != 0)
@@ -73,7 +73,7 @@ namespace Assets.Utility
                         (pos.Y >= 0 && pos.Y < Board.BOARD_SIZE) &&
                         visited[pos.X, pos.Y] == false &&
                         !open.Contains(temp) &&
-                        node.State.IsPawnMoveLegalSimplified(x, y, pos.X, pos.Y))
+                        board.IsPawnMoveLegalSimplified(x, y, pos.X, pos.Y))
                         open.Enqueue(temp, F(temp));
                 }
             } 

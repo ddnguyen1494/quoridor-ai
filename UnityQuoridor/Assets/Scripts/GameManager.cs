@@ -248,7 +248,13 @@ public class GameManager : MonoBehaviour {
         Assets.Scripts.ActionFunction action = MyAgent.NextMove(Board); // <- currently has an issue
         if (action.function == null)
             Debug.LogError("Agent action is null. Something is wrong");
-        
+        //if (action.function.Method.Name == "Move")
+        //    rendermove()
+        //else
+        //{
+        //    playerStatus[playerStatus].wallsLeft--;
+        //    renderwall()
+        //}
         switch (action.param3)
         {
             case -1:
@@ -460,7 +466,7 @@ public class GameManager : MonoBehaviour {
 						//if wall can be placed, place it and end turn
 						if (playerStatus[p].wallsLeft > 0 && Board.CheckWallH (tempPeg.x, tempPeg.y)) {
                             PlaceWallH(tempPeg.x, tempPeg.y);
-                            Board.PlaceWallH(tempPeg.x, tempPeg.y);
+                            Board.PlaceWallH(Board, tempPeg.x, tempPeg.y);
 							playerStatus [p].wallsLeft--;
 							playerStatus [p].currentTurn = false;
 							UpdateWallRemTxt ();
@@ -482,7 +488,7 @@ public class GameManager : MonoBehaviour {
 						//if wall can be placed, place it and end turn
 						if (playerStatus[p].wallsLeft > 0 && Board.CheckWallV (tempPeg.x, tempPeg.y)) {
                             PlaceWallV(tempPeg.x, tempPeg.y);
-                            Board.PlaceWallV(tempPeg.x, tempPeg.y);
+                            Board.PlaceWallV(Board, tempPeg.x, tempPeg.y);
                             playerStatus [p].currentTurn = false;
 							playerStatus [p].wallsLeft--;
 							UpdateWallRemTxt ();

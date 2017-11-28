@@ -300,7 +300,7 @@ namespace Assets.Scripts
             return false;
         }
 
-        public bool PlaceWallH(int xPos, int yPos, int dummy = -1, bool isHorizontal = true)
+        public bool PlaceWallH(Board board, int xPos, int yPos, int dummy = -1, bool isHorizontal = true)
         {
             wallPegStatus[xPos, yPos].isOpen = false;
             boardStatus[xPos, yPos].hasBotWall = true;
@@ -308,12 +308,39 @@ namespace Assets.Scripts
             return true;
         }
 
-        public bool PlaceWallV(int xPos, int yPos, int dummy = -1, bool isHorizontal = false)
+        public bool RemoveWallH(Board board, int xPos, int yPos, int player, bool isHorizontal = true)
+        {
+            playerStatus[player].wallsLeft++;
+            wallPegStatus[xPos, yPos].isOpen = true;
+            boardStatus[xPos, yPos].hasBotWall = false;
+            boardStatus[xPos, yPos + 1].hasBotWall = false;
+            return true;
+        }
+
+        public bool PlaceWallV(Board board, int xPos, int yPos, int dummy = -1, bool isHorizontal = false)
         {
             wallPegStatus[xPos, yPos].isOpen = false;
             boardStatus[xPos, yPos].hasRightWall = true;
             boardStatus[xPos + 1, yPos].hasRightWall = true;
             return true;
+        }
+        
+        public bool RemoveWallV(Board board, int xPos, int yPos, int player, bool isHorizontal = false)
+        {
+            playerStatus[player].wallsLeft++;
+            wallPegStatus [xPos, yPos].isOpen = true;
+            boardStatus [xPos, yPos].hasRightWall = false;
+            boardStatus [xPos + 1, yPos].hasRightWall = false;
+            return true;
+        }
+
+        public static bool UndoMove(Board board, int p, int oldX, int oldY, bool turnjumping = false)
+        {
+            board.boardStatus[board.playerStatus[p].x, board.playerStatus[p].y].isOpen = true;
+            board.boardStatus[oldX, oldY].isOpen = false;
+            board.playerStatus[p].x = oldX;
+            board.playerStatus[p].y = oldY;
+            return false;
         }
         #endregion
 
@@ -414,7 +441,7 @@ namespace Assets.Scripts
             else if (xDiff == -1 && yDiff == 0 &&
                     formerX > 0 &&
                     !boardStatus[formerX - 1, formerY].hasBotWall &&
-                    !boardStatus[formerX - 1, formerY].isOpen)
+                    boardStatus[formerX - 1, formerY].isOpen)
             {
                 return true;
             }
@@ -462,7 +489,7 @@ namespace Assets.Scripts
             else if (xDiff == 0 && yDiff == -1 &&
                     formerY > 0 &&
                     !boardStatus[formerX, formerY - 1].hasRightWall &&
-                    !boardStatus[formerX, formerY - 1].isOpen)
+                    boardStatus[formerX, formerY - 1].isOpen)
             {
                 return true;
             }
@@ -509,7 +536,7 @@ namespace Assets.Scripts
             else if (xDiff == 0 && yDiff == 1 &&
                 formerY < 8 &&
                 !boardStatus[formerX, formerY].hasRightWall &&
-                !boardStatus[formerX, formerY + 1].isOpen)
+                boardStatus[formerX, formerY + 1].isOpen)
             {
                 return true;
             }

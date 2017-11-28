@@ -20,20 +20,22 @@ namespace Assets.Scripts
 
     class AlphaBeta
     {
-        private static ValueAndAction MaxValue(Node node, ref int alpha, ref int beta, int depth)
+        private static ValueAndAction MaxValue(Board board, Node node, ref int alpha, ref int beta, int depth)
         {
-            if (Agent.CutOff(node.State, depth))
+            if (Agent.CutOff(depth))
             {
                 node.Value = Agent.Evaluate(node);
-                return new ValueAndAction(node.Value, node.Action);
+                return new ValueAndAction(node.Value, node.Move);
             }
             int tempVal = int.MinValue;
             ActionFunction tempAction = new ActionFunction();
             Agent.GenerateSuccessors(node);
             foreach (Node child in node.Children)
             {
-                var retValAction = MinValue(child, ref alpha, ref beta, depth + 1);
-                if(retValAction.value > tempVal)
+                board.ExecuteFunction(child.Move);
+                var retValAction = MinValue(board, child, ref alpha, ref beta, depth + 1);
+                board.ExecuteFunction(child.Undo);
+                if (retValAction.value > tempVal)
                 {
                     tempVal = retValAction.value;
                     tempAction = retValAction.action;
@@ -46,19 +48,21 @@ namespace Assets.Scripts
 
         }
 
-        private static ValueAndAction MinValue(Node node, ref int alpha, ref int beta, int depth)
+        private static ValueAndAction MinValue(Board board, Node node, ref int alpha, ref int beta, int depth)
         {
-            if (Agent.CutOff(node.State, depth))
+            if (Agent.CutOff(depth))
             {
                 node.Value = Agent.Evaluate(node);
-                return new ValueAndAction(node.Value, node.Action);
+                return new ValueAndAction(node.Value, node.Move);
             }
             int tempVal = int.MaxValue;
             ActionFunction tempAction = new ActionFunction();
             Agent.GenerateSuccessors(node);
             foreach (Node child in node.Children)
             {
-                var retValAction = MaxValue(child, ref alpha, ref beta, depth + 1);
+                board.ExecuteFunction(child.Move);
+                var retValAction = MaxValue(board, child, ref alpha, ref beta, depth + 1);
+                board.ExecuteFunction(child.Undo);
                 if (retValAction.value < tempVal)
                 {
                     tempVal = retValAction.value;
@@ -71,11 +75,11 @@ namespace Assets.Scripts
             return new ValueAndAction(tempVal, tempAction);
         }
 
-        public static ActionFunction Search(Node root)
+        public static ActionFunction Search(Board board, Node root)
         {
             int alpha = int.MinValue;
             int beta = int.MaxValue;
-            return MaxValue(root, ref alpha, ref beta, 0).action;
+            return MaxValue(board, root, ref alpha, ref beta, 0).action;
         }
     }
 }

@@ -21,17 +21,22 @@ namespace Assets.Scripts
     }
     internal class Node
     {
-        public Board State { get; set; }
         public int Value { get; set; }
-        public ActionFunction Action { get; set; }
+        public ActionFunction Move { get; set; }
+        public ActionFunction Undo { get; set; }
         public int Player { get; set; }
         public List<Node> Children { get; set; }
 
-        public Node(Board state, int value, ActionFunction move, int player)
+        public Node(ActionFunction move, ActionFunction undoMove, int player)
         {
-            State = new Board(state);
-            Value = value;
-            Action = move;
+            Move = move;
+            Undo = undoMove;
+            Player = player;
+            Children = new List<Node>();
+        }
+
+        public Node(int player)
+        {
             Player = player;
             Children = new List<Node>();
         }
