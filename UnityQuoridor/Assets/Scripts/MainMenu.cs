@@ -30,11 +30,4 @@ public class MainMenu : MonoBehaviour {
 		SceneManager.LoadScene (1);
 	}
 
-	public void LoadSceneEvE(int num)
-	{
-		playerTotal = num;
-		playerSettings = 2;
-		SceneManager.LoadScene (1);
-	}
-
 }
