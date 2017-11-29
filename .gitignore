@@ -64,9 +64,8 @@ bld/
 /UnityQuoridor/[Bb]uild/
 /UnityQuoridor/[Bb]uilds/
 /UnityQuoridor/Assets/AssetStoreTools*
-/UnityQuoridor/Assets/UnityVS*
+/UnityQuoridor/Assets/UnityVS/
 /UnityQuoridor/packages/
-
 # Visual Studio 2015 cache directory
 /UnityQuoridor/.vs/
 

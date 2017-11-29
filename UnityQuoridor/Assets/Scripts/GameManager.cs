@@ -171,7 +171,6 @@ public class GameManager : MonoBehaviour
             playerStatus[1].goalX = 8;
             playerStatus[1].goalY = -1;
             boardStatus[0, 4].isOpen = false;
-<<<<<<< HEAD
 			if (MainMenu.playerSettings == 1 || MainMenu.playerSettings == 2) // If PvE or EvE was selected make 2nd player a Bot
             {
                 playerStatus[1].isAi = true;
@@ -179,15 +178,6 @@ public class GameManager : MonoBehaviour
             }
             //playerStatus[1].isAi = true;
             //MyAgent = new Agent();
-=======
-            //if (MainMenu.playerSettings == 1) // If PvE was selected make 2nd player a Bot
-            //{
-            //    playerStatus[1].isAi = true;
-            //    MyAgent = new Assets.Scripts.Agent();
-            //}
-            playerStatus[1].isAi = true;
-            MyAgent = new Agent();
->>>>>>> 8706a11d01401a95638eb98a0ddb21f354d6d510
         }
         // For 4 players set up start information this way
         else if (numPlayers == 4)
@@ -276,10 +266,7 @@ public class GameManager : MonoBehaviour
 		yield return m_StartWait; // wait 1 second before action (just in case action takes shorter than 1 second)
         Assets.Scripts.ActionFunction action = MyAgent.NextMove(MainBoard); // <- currently has an issue
         if (action.function == null)
-        {
-            Debug.LogError("Agent action is null. Something is wrong. Agent just skip his move");
-            yield break;
-        }
+            Debug.LogError("Agent action is null. Something is wrong");
         if (action.function.Method.Name == "MovePawn")
             RenderPawnPosition(action.player, action.x, action.y);
         else if (action.function.Method.Name == "PlaceHorizontalWall")
@@ -289,7 +276,6 @@ public class GameManager : MonoBehaviour
         else
             Debug.LogError("Agent returning a non-supported action");
         MainBoard.ExecuteFunction(action);
-        UpdateWallRemTxt(); //Update UI anyway because it doesn't matter
         yield return null;
         //switch (action.param3)
         //{
