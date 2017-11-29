@@ -339,7 +339,7 @@ public class GameManager : MonoBehaviour
                             // DOWN-----------------------------------------------------------
                             // going down by 1 (checks on location and for walls)
                             if (xDiff == 1 && yDiff == 0 &&
-                                MainBoard.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, tempSquare[x], tempSquare[y]))
+                                MainBoard.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, tempSquare.x, tempSquare.y))
                             {
                                 RenderPawnPosition(p, tempSquare.x, tempSquare.y);
                                 Board.MovePawn(MainBoard, p, tempSquare.x, tempSquare.y);
@@ -347,7 +347,7 @@ public class GameManager : MonoBehaviour
                             }
                             // going down jumping over 1 player directly
                             else if (xDiff == 2 && yDiff == 0 &&
-                                MainBoard.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, tempSquare[x], tempSquare[y])
+								MainBoard.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, tempSquare.x, tempSquare.y))
                             {
                                 RenderPawnPosition(p, tempSquare.x, tempSquare.y);
                                 Board.MovePawn(MainBoard, p, tempSquare.x, tempSquare.y);
@@ -355,7 +355,7 @@ public class GameManager : MonoBehaviour
                             }
                             // going Down by 1 AND to the Left by 1
                             else if (xDiff == 1 && yDiff == -1 &&
-                                MainBoard.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, tempSquare[x], tempSquare[y]))
+                                MainBoard.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, tempSquare.x, tempSquare.y))
                             {
                                 RenderPawnPosition(p, tempSquare.x, tempSquare.y);
                                 Board.MovePawn(MainBoard, p, tempSquare.x, tempSquare.y);
@@ -365,7 +365,7 @@ public class GameManager : MonoBehaviour
                             // UP-----------------------------------------------------------------------
                             // going up by 1 (checks on location and for walls)
                             else if (xDiff == -1 && yDiff == 0 &&
-                             MainBoard.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, tempSquare[x], tempSquare[y]))
+                             MainBoard.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, tempSquare.x, tempSquare.y))
                             {
                                 RenderPawnPosition(p, tempSquare.x, tempSquare.y);
                                 Board.MovePawn(MainBoard, p, tempSquare.x, tempSquare.y);
@@ -373,7 +373,7 @@ public class GameManager : MonoBehaviour
                             }
                             // going up jumping over 1 player directly
                             else if (xDiff == -2 && yDiff == 0 &&
-                             MainBoard.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, tempSquare[x], tempSquare[y]))
+                             MainBoard.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, tempSquare.x, tempSquare.y))
                             {
                                 RenderPawnPosition(p, tempSquare.x, tempSquare.y);
                                 Board.MovePawn(MainBoard, p, tempSquare.x, tempSquare.y);
@@ -381,7 +381,7 @@ public class GameManager : MonoBehaviour
                             }
                             // going Up by 1 AND Right by 1
                             else if (xDiff == -1 && yDiff == 1 &&
-                                MainBoard.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, tempSquare[x], tempSquare[y]))
+                                MainBoard.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, tempSquare.x, tempSquare.y))
                             {
                                 RenderPawnPosition(p, tempSquare.x, tempSquare.y);
                                 Board.MovePawn(MainBoard, p, tempSquare.x, tempSquare.y);
@@ -392,7 +392,7 @@ public class GameManager : MonoBehaviour
                             // LEFT-----------------------------------------------------------------------
                             // going Left by 1 (checks on location and for walls)
                             else if (xDiff == 0 && yDiff == -1 &&
-                             MainBoard.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, tempSquare[x], tempSquare[y]))
+                             MainBoard.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, tempSquare.x, tempSquare.y))
                             {
                                 RenderPawnPosition(p, tempSquare.x, tempSquare.y);
                                 Board.MovePawn(MainBoard, p, tempSquare.x, tempSquare.y);
@@ -400,7 +400,7 @@ public class GameManager : MonoBehaviour
                             }
                             // going Left jumping over 1 player directly
                             else if (xDiff == 0 && yDiff == -2 &&
-                             MainBoard.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, tempSquare[x], tempSquare[y])
+								MainBoard.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, tempSquare.x, tempSquare.y))
                             {
                                 RenderPawnPosition(p, tempSquare.x, tempSquare.y);
                                 Board.MovePawn(MainBoard, p, tempSquare.x, tempSquare.y);
@@ -408,7 +408,7 @@ public class GameManager : MonoBehaviour
                             }
                             //going Left by 1 AND Up by 1
                             else if (xDiff == -1 && yDiff == -1 &&
-                                MainBoard.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, tempSquare[x], tempSquare[y]))
+                                MainBoard.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, tempSquare.x, tempSquare.y))
                             {
                                 RenderPawnPosition(p, tempSquare.x, tempSquare.y);
                                 Board.MovePawn(MainBoard, p, tempSquare.x, tempSquare.y);
@@ -419,14 +419,14 @@ public class GameManager : MonoBehaviour
                             // RIGHT-----------------------------------------------------------------------
                             // going Right by 1 (checks on location and for walls)
                             else if (xDiff == 0 && yDiff == 1 &&
-                             MainBoard.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, tempSquare[x], tempSquare[y]))
+                             MainBoard.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, tempSquare.x, tempSquare.y))
                             {
                                 RenderPawnPosition(p, tempSquare.x, tempSquare.y);
                                 Board.MovePawn(MainBoard, p, tempSquare.x, tempSquare.y);
                                 playerStatus[p].currentTurn = false;
                             }
                             else if (xDiff == 0 && yDiff == 2 &&
-                             MainBoard.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, tempSquare[x], tempSquare[y]))
+                             MainBoard.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, tempSquare.x, tempSquare.y))
                             {
                                 RenderPawnPosition(p, tempSquare.x, tempSquare.y);
                                 Board.MovePawn(MainBoard, p, tempSquare.x, tempSquare.y);
@@ -434,7 +434,7 @@ public class GameManager : MonoBehaviour
                             }
                             // going Right by 1 AND Down by 1
                             else if (xDiff == 1 && yDiff == 1 &&
-                             MainBoard.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, tempSquare[x], tempSquare[y]))
+                             MainBoard.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, tempSquare.x, tempSquare.y))
                             {
                                 RenderPawnPosition(p, tempSquare.x, tempSquare.y);
                                 Board.MovePawn(MainBoard, p, tempSquare.x, tempSquare.y);
