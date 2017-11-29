@@ -95,3 +95,5 @@ UnityQuoridor/sysinfo.txt
 UnityQuoridor/*.apk
 *.unitypackage
 
+#don't delete my priority queue
+!/UnityQuoridor/Assets/Plugins/Priority Queue.dll
