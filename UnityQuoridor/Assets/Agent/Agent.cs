@@ -33,8 +33,9 @@ namespace Assets.Scripts
                     current_depth++;
                     
                     bestAction = AlphaBeta.Search(board, root);
-				} while (sw.ElapsedMilliseconds / 1000 < 10 && current_depth < MAX_DEPTH); // 10 seconds to think
+				} while (false && sw.ElapsedMilliseconds / 1000 < 10 && current_depth < MAX_DEPTH); // 10 seconds to think
 				sw.Stop();
+                sw.Reset();
                 current_depth = 0;
             }
             catch(Exception ex)
@@ -169,7 +170,7 @@ namespace Assets.Scripts
                         node.Children.Add(new Node(new ActionFunction(Board.MovePawn, p, playerStatus[p].x + 2, playerStatus[p].y), undo, nextPlayer));
                     }
                     // going Down by 1 AND to the Left by 1
-                    if (board.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, playerStatus[p].x + 1, playerStatus[p].y -1))
+                    if (board.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, playerStatus[p].x + 1, playerStatus[p].y - 1))
                     {
                         node.Children.Add(new Node(new ActionFunction(Board.MovePawn, p, playerStatus[p].x + 1, playerStatus[p].y - 1), undo, nextPlayer));
                     }
@@ -184,7 +185,7 @@ namespace Assets.Scripts
                 //Move Left
                 //   if (playerStatus[p].y - 1 >= 0)
                 //  {
-                if (board.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, playerStatus[p].x, playerStatus[p].y -1))
+                if (board.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, playerStatus[p].x, playerStatus[p].y - 1))
                 {
                     node.Children.Add(new Node(new ActionFunction(Board.MovePawn, p, playerStatus[p].x, playerStatus[p].y - 1), undo, nextPlayer));
                 }
@@ -223,7 +224,7 @@ namespace Assets.Scripts
                         node.Children.Add(new Node(new ActionFunction(Board.MovePawn, p, playerStatus[p].x - 1, playerStatus[p].y + 1), undo, nextPlayer));
                     }
                     //going Left by 1 AND Up by 1
-                    if (board.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, playerStatus[p].x - 1, playerStatus[p].y -1))
+                    if (board.IsPawnMoveLegal(playerStatus[p].x, playerStatus[p].y, playerStatus[p].x - 1, playerStatus[p].y - 1))
                     {
                         node.Children.Add(new Node(new ActionFunction(Board.MovePawn, p, playerStatus[p].x - 1, playerStatus[p].y - 1), undo, nextPlayer));
                     }
@@ -234,7 +235,6 @@ namespace Assets.Scripts
             #region Wall Generation (for both players) taking too long
             if (playerStatus[p].wallsLeft == 0) // player has no wall left
                 return;
-            playerStatus[p].wallsLeft--;
             ActionFunction undoWall;
             for (int x = 0; x < Board.BOARD_SIZE - 1; x++)
             {

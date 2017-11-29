@@ -106,6 +106,9 @@ namespace Assets.Scripts
                 if (CheckWinnable(0) && CheckWinnable(1))
                 {
                     //PlaceWallH(xPos, yPos);
+                    wallPegStatus[xPos, yPos].isOpen = true; //dont need?
+                    boardStatus[xPos, yPos].hasBotWall = false;
+                    boardStatus[xPos, yPos + 1].hasBotWall = false;
                     return true;
                 }
                 else
@@ -180,6 +183,9 @@ namespace Assets.Scripts
                 if (CheckWinnable(0) && CheckWinnable(1))
                 {
                     //PlaceWallV(xPos, yPos);
+                    wallPegStatus[xPos, yPos].isOpen = true; //dont need?
+                    boardStatus[xPos, yPos].hasRightWall = false;
+                    boardStatus[xPos + 1, yPos].hasRightWall = false;
                     return true;
                 }
                 else
