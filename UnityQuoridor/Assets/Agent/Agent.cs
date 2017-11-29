@@ -63,7 +63,7 @@ namespace Assets.Scripts
         {
             if (board.playerStatus[PLAYER1].CheckWin() ||
                 board.playerStatus[PLAYER2].CheckWin() ||
-                depth == 1)
+                depth == 3)
                 return true;
             return false;
         }

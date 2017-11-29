@@ -38,9 +38,12 @@ namespace Assets.Scripts
                 if (retValAction.value > tempVal)
                 {
                     tempVal = retValAction.value;
-                    tempAction = retValAction.action;
+                    tempAction = child.Move;
                     if (retValAction.value >= beta)
+                    {
+                        retValAction.action = child.Move;
                         return retValAction;
+                    }
                     alpha = Math.Max(alpha, retValAction.value);
                 }
             }
@@ -66,9 +69,12 @@ namespace Assets.Scripts
                 if (retValAction.value < tempVal)
                 {
                     tempVal = retValAction.value;
-                    tempAction = retValAction.action;
+                    tempAction = child.Move;
                     if (retValAction.value <= alpha)
+                    {
+                        retValAction.action = child.Move;
                         return retValAction;
+                    }
                     beta = Math.Min(beta, retValAction.value);
                 }
             }
