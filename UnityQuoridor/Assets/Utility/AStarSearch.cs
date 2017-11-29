@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Assets.Scripts;
-using Priority_Queue;
+//using Priority_Queue;
 
 namespace Assets.Utility
 {
@@ -19,12 +19,12 @@ namespace Assets.Utility
     {
         public Position Pos { get; set; }
         public int PathCost { get; set; }
-        public QueueNode(int x, int y, int cost)
+		public QueueNode(int x, int y, int cost) : this()
         {
             Pos = new Position(x, y);
             PathCost = cost;
         }
-        public QueueNode(Position pos, int cost)
+		public QueueNode(Position pos, int cost) : this()
         {
             Pos = pos;
             PathCost = cost;
@@ -51,7 +51,7 @@ namespace Assets.Utility
         }
         public static int FindShortestPathLength(Board board, Node node, int player)
         {
-            SimplePriorityQueue<QueueNode> open = new SimplePriorityQueue<QueueNode>();
+            /*SimplePriorityQueue<QueueNode> open = new SimplePriorityQueue<QueueNode>();
 
             bool[,] visited = new bool[Board.BOARD_SIZE, Board.BOARD_SIZE];
             GOAL = board.playerStatus[player].goalX;
@@ -76,7 +76,7 @@ namespace Assets.Utility
                         board.IsPawnMoveLegalSimplified(x, y, pos.X, pos.Y))
                         open.Enqueue(temp, F(temp));
                 }
-            } 
+            } */
             return -1;
         }
     }
