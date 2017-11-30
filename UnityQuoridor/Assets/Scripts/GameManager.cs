@@ -265,7 +265,10 @@ public class GameManager : MonoBehaviour
         playersTurnText.text = "Player " + (playerNum + 1) + "'s Turn!";
         Assets.Scripts.ActionFunction action = MyAgent.NextMove(MainBoard); // <- currently has an issue
         if (action.function == null)
-            Debug.LogError("Agent action is null. Something is wrong");
+        {
+            Debug.LogError("Agent action is null. Something is wrong. Agent just skip his move");
+            yield break;
+        }
         if (action.function.Method.Name == "MovePawn")
             RenderPawnPosition(action.player, action.x, action.y);
         else if (action.function.Method.Name == "PlaceHorizontalWall")
@@ -275,6 +278,7 @@ public class GameManager : MonoBehaviour
         else
             Debug.LogError("Agent returning a non-supported action");
         MainBoard.ExecuteFunction(action);
+        UpdateWallRemTxt(); //Update UI anyway because it doesn't matter
         yield return null;
         //switch (action.param3)
         //{
