@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using Assets.Utility;
 
 namespace Assets.Scripts
 {
@@ -52,41 +53,41 @@ namespace Assets.Scripts
                 }
             }
         }
-        public void GetAccessible(int x, int y, int num, int direction)
-        {
-            if (accessible[x, y] > num)
-            {
-                accessible[x, y] = num;
-                if (direction != 1 && x != 8 && CanMoveDown(x, y))
-                {
-                    GetAccessible(x + 1, y, num + 1, 3);
-                }
-                if (direction != 2 && y != 8 && CanMoveRight(x, y))
-                {
-                    GetAccessible(x, y + 1, num + 1, 0);
-                }
-                if (direction != 3 && x != 0 && CanMoveUp(x, y))
-                {
-                    GetAccessible(x - 1, y, num + 1, 1);
-                }
-                if (direction != 0 && y != 0 && CanMoveLeft(x, y))
-                {
-                    GetAccessible(x, y - 1, num + 1, 2);
-                }
-            }
-        }
-
-        public void GetAccessible(int x, int y)
-        {
-            for (int i = 0; i < BOARD_SIZE; i++)
-            {
-                for (int j = 0; j < BOARD_SIZE; j++)
-                {
-                    accessible[i, j] = 1000;
-                }
-            }
-            GetAccessible(x, y, 0, -1);
-        }
+//        public void GetAccessible(int x, int y, int num, int direction)
+//        {
+//            if (accessible[x, y] > num)
+//            {
+//                accessible[x, y] = num;
+//                if (direction != 1 && x != 8 && CanMoveDown(x, y))
+//                {
+//                    GetAccessible(x + 1, y, num + 1, 3);
+//                }
+//                if (direction != 2 && y != 8 && CanMoveRight(x, y))
+//                {
+//                    GetAccessible(x, y + 1, num + 1, 0);
+//                }
+//                if (direction != 3 && x != 0 && CanMoveUp(x, y))
+//                {
+//                    GetAccessible(x - 1, y, num + 1, 1);
+//                }
+//                if (direction != 0 && y != 0 && CanMoveLeft(x, y))
+//                {
+//                    GetAccessible(x, y - 1, num + 1, 2);
+//                }
+//            }
+//        }
+//
+//        public void GetAccessible(int x, int y)
+//        {
+//            for (int i = 0; i < BOARD_SIZE; i++)
+//            {
+//                for (int j = 0; j < BOARD_SIZE; j++)
+//                {
+//                    accessible[i, j] = 1000;
+//                }
+//            }
+//            GetAccessible(x, y, 0, -1);
+//        }
 
         #region Logic for checking if a move is legal
         public bool CheckWallH(int xPos, int yPos)
@@ -95,31 +96,33 @@ namespace Assets.Scripts
                 !boardStatus[xPos, yPos + 1].hasBotWall &&
                  wallPegStatus[xPos, yPos].isOpen)
             {
-
+				bool retVal;
                 //Checking if winnable
                 // Set as if there is a wall and check if can still be won
-                wallPegStatus[xPos, yPos].isOpen = false; //dont need?
-                boardStatus[xPos, yPos].hasBotWall = true;
-                boardStatus[xPos, yPos + 1].hasBotWall = true;
+//                wallPegStatus[xPos, yPos].isOpen = false; //dont need?
+//                boardStatus[xPos, yPos].hasBotWall = true;
+//                boardStatus[xPos, yPos + 1].hasBotWall = true;
+				PlaceHorizontalWall(this, -1, xPos, yPos);
 
                 //if still winnable place the wall, else revert back to no wall
                 if (CheckWinnable(0) && CheckWinnable(1))
                 {
                     //PlaceWallH(xPos, yPos);
-                    wallPegStatus[xPos, yPos].isOpen = true; //dont need?
-                    boardStatus[xPos, yPos].hasBotWall = false;
-                    boardStatus[xPos, yPos + 1].hasBotWall = false;
-                    return true;
+//                    wallPegStatus[xPos, yPos].isOpen = true; //dont need?
+//                    boardStatus[xPos, yPos].hasBotWall = false;
+//                    boardStatus[xPos, yPos + 1].hasBotWall = false;
+					retVal = true;
                 }
                 else
                 {
-                    wallPegStatus[xPos, yPos].isOpen = true; //dont need?
-                    boardStatus[xPos, yPos].hasBotWall = false;
-                    boardStatus[xPos, yPos + 1].hasBotWall = false;
+//                    wallPegStatus[xPos, yPos].isOpen = true; //dont need?
+//                    boardStatus[xPos, yPos].hasBotWall = false;
+//                    boardStatus[xPos, yPos + 1].hasBotWall = false;
                     Debug.Log("CANT PLACE H WALL CHEATER!!!");
-                    return false;
+					retVal = false;
                 }
-
+				UndoPlaceHorizontalWall (this, -1, xPos, yPos);
+				return retVal;
             }
             else
             {
@@ -132,38 +135,39 @@ namespace Assets.Scripts
 
         public bool CheckWinnable(int id)
         {
-            bool possible = false;
-            //gets the possible routes for current player
-            GetAccessible(playerStatus[id].x, playerStatus[id].y);
-            //checks to see which player goal is looked at
-            //if any goal state doesn't have access of 1000 then its possible
-            if (playerStatus[id].goalX >= 0)
-            {
-
-                for (int i = 0; i < BOARD_SIZE; i++)
-                {
-                    if (accessible[playerStatus[id].goalX, i] != 1000)
-                    {
-                        possible = true;
-                        break;
-                    }
-                }
-                return possible;
-            }
-            if (playerStatus[id].goalY >= 0)
-            {
-
-                for (int i = 0; i < BOARD_SIZE; i++)
-                {
-                    if (accessible[i, playerStatus[id].goalY] != 1000)
-                    {
-                        possible = true;
-                        break;
-                    }
-                }
-                return possible;
-            }
-            return false;
+//            bool possible = false;
+//            //gets the possible routes for current player
+//            GetAccessible(playerStatus[id].x, playerStatus[id].y);
+//            //checks to see which player goal is looked at
+//            //if any goal state doesn't have access of 1000 then its possible
+//            if (playerStatus[id].goalX >= 0)
+//            {
+//
+//                for (int i = 0; i < BOARD_SIZE; i++)
+//                {
+//                    if (accessible[playerStatus[id].goalX, i] != 1000)
+//                    {
+//                        possible = true;
+//                        break;
+//                    }
+//                }
+//                return possible;
+//            }
+//            if (playerStatus[id].goalY >= 0)
+//            {
+//
+//                for (int i = 0; i < BOARD_SIZE; i++)
+//                {
+//                    if (accessible[i, playerStatus[id].goalY] != 1000)
+//                    {
+//                        possible = true;
+//                        break;
+//                    }
+//                }
+//                return possible;
+//            }
+//            return false;
+			return AStarSearch.FindShortestPathLength(this, null, id) != -1;
         }
 
         public bool CheckWallV(int xPos, int yPos)
@@ -175,28 +179,31 @@ namespace Assets.Scripts
 
                 //Checking if winnable
                 // Set as if there is a wall and check if can still be won
-                wallPegStatus[xPos, yPos].isOpen = false; //dont need?
-                boardStatus[xPos, yPos].hasRightWall = true;
-                boardStatus[xPos + 1, yPos].hasRightWall = true;
-
+//                wallPegStatus[xPos, yPos].isOpen = false; //dont need?
+//                boardStatus[xPos, yPos].hasRightWall = true;
+//                boardStatus[xPos + 1, yPos].hasRightWall = true;
+				Board.PlaceVerticalWall(this, -1, xPos, yPos);
+				bool retVal;
                 //if still winnable place the wall, else revert back to no wall
                 if (CheckWinnable(0) && CheckWinnable(1))
                 {
                     //PlaceWallV(xPos, yPos);
-                    wallPegStatus[xPos, yPos].isOpen = true; //dont need?
-                    boardStatus[xPos, yPos].hasRightWall = false;
-                    boardStatus[xPos + 1, yPos].hasRightWall = false;
-                    return true;
+//                    wallPegStatus[xPos, yPos].isOpen = true; //dont need?
+//                    boardStatus[xPos, yPos].hasRightWall = false;
+//                    boardStatus[xPos + 1, yPos].hasRightWall = false;
+                     retVal = true;
                 }
                 else
                 {
-                    wallPegStatus[xPos, yPos].isOpen = true; //dont need?
-                    boardStatus[xPos, yPos].hasRightWall = false;
-                    boardStatus[xPos + 1, yPos].hasRightWall = false;
+//                    wallPegStatus[xPos, yPos].isOpen = true; //dont need?
+//                    boardStatus[xPos, yPos].hasRightWall = false;
+//                    boardStatus[xPos + 1, yPos].hasRightWall = false;
                     //MessageText.text = "Can't Place Vertical wall there!";
                     Debug.Log("CANT PLACE V WALL CHEATER!!!");
-                    return false;
+					retVal = false;
                 }
+				UndoPlaceVerticalWall (this, -1, xPos, yPos);
+				return retVal;
             }
             else
             {
@@ -239,7 +246,8 @@ namespace Assets.Scripts
             board.wallPegStatus[x, y].isOpen = false;
             board.boardStatus[x, y].hasBotWall = true;
             board.boardStatus[x, y + 1].hasBotWall = true;
-            board.playerStatus[player].wallsLeft--;
+			if (player != -1)
+				board.playerStatus[player].wallsLeft--;
         }
 
         public static void UndoPlaceHorizontalWall(Board board, int player, int x, int y)
@@ -247,7 +255,8 @@ namespace Assets.Scripts
             board.wallPegStatus[x, y].isOpen = true;
             board.boardStatus[x, y].hasBotWall = false;
             board.boardStatus[x, y + 1].hasBotWall = false;
-            board.playerStatus[player].wallsLeft++;
+			if (player != -1)
+				board.playerStatus[player].wallsLeft++;
         }
 
         public static void PlaceVerticalWall(Board board, int player, int x, int y)
@@ -255,7 +264,8 @@ namespace Assets.Scripts
             board.wallPegStatus[x, y].isOpen = false;
             board.boardStatus[x, y].hasRightWall = true;
             board.boardStatus[x + 1, y].hasRightWall = true;
-            board.playerStatus[player].wallsLeft--;
+			if (player != -1)
+            	board.playerStatus[player].wallsLeft--;
         }
 
         public static void UndoPlaceVerticalWall(Board board, int player, int x, int y)
@@ -263,7 +273,8 @@ namespace Assets.Scripts
             board.wallPegStatus[x, y].isOpen = true;
             board.boardStatus[x, y].hasRightWall = false;
             board.boardStatus[x + 1, y].hasRightWall = false;
-            board.playerStatus[player].wallsLeft++;
+			if (player != -1)
+            	board.playerStatus[player].wallsLeft++;
         }
 #endregion
 

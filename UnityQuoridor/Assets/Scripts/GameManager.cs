@@ -34,7 +34,6 @@ public class GameManager : MonoBehaviour
     public float startDelay = 1f;
     public float aiDelay = 10f;
     private WaitForSeconds m_StartWait;
-    private WaitForSeconds m_AiWait;
 
     int totalWalls = 20;
     bool gameOver = false;
@@ -79,7 +78,6 @@ public class GameManager : MonoBehaviour
         SpawnPlayers(); // make references to players (and Ai's)
 
         m_StartWait = new WaitForSeconds(startDelay);
-        m_AiWait = new WaitForSeconds(aiDelay);
         StartCoroutine(GameLoop());
     }
 

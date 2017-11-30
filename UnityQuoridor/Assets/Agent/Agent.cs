@@ -72,8 +72,6 @@ namespace Assets.Scripts
         {
             //Player 1 prioritizes moving up -> left or right -> Wall -> Down (tentative Move Ordering)
             PlayerInfo[] playerStatus = board.playerStatus;
-            gameSquareInfo[,] boardStatus = board.boardStatus;
-            WallPeg[,] wallPegStatus = board.wallPegStatus;
             int p = node.Player;
             int nextPlayer = (p + 1) % 2;
             ActionFunction undo = new ActionFunction(Board.UndoMovePawn, p, playerStatus[p].x, playerStatus[p].y);
