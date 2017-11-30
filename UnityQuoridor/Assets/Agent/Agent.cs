@@ -52,10 +52,10 @@ namespace Assets.Scripts
             int opponent_dist = AStarSearch.FindShortestPathLength(board, node, PLAYER1);
             int my_dist = AStarSearch.FindShortestPathLength(board, node, PLAYER2);
             if (opponent_dist == 0)
-                return -1000;
+                return -50;
             if (my_dist == 0)
-                return +1000;
-            int score = opponent_dist - my_dist + (playerStatus[PLAYER2].wallsLeft - playerStatus[PLAYER1].wallsLeft);
+                return +50;
+            int score = (int) (opponent_dist - my_dist + 1 *(playerStatus[PLAYER1].wallsLeft - playerStatus[PLAYER2].wallsLeft));
             return score;
         }
 
@@ -63,7 +63,7 @@ namespace Assets.Scripts
         {
             if (board.playerStatus[PLAYER1].CheckWin() ||
                 board.playerStatus[PLAYER2].CheckWin() ||
-                depth == 3)
+                depth == 1)
                 return true;
             return false;
         }

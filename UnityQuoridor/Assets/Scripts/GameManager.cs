@@ -176,8 +176,6 @@ public class GameManager : MonoBehaviour
                 playerStatus[1].isAi = true;
                 MyAgent = new Assets.Scripts.Agent();
             }
-            //playerStatus[1].isAi = true;
-            //MyAgent = new Agent();
         }
         // For 4 players set up start information this way
         else if (numPlayers == 4)
