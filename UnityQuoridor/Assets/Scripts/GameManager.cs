@@ -322,12 +322,16 @@ public class GameManager : MonoBehaviour
                 yield return m_StartWait;
                 Debug.Log("Player " + (p + 1) + "Passes.");
             }
-            // Moving Handler
-            if (Input.GetMouseButtonUp(0))
+
+			ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+			RaycastHit hit;
+			bool collisionFound = Physics.Raycast(ray, out hit);
+
+			// Moving Handler
+			if (Input.GetMouseButtonUp(0))
             {
                 GameObject tempObj;
-                ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                if (Physics.Raycast(ray, out hit))
+                if (collisionFound)
                 {
                     if (hit.transform.tag == "Board")
                     {
@@ -472,10 +476,9 @@ public class GameManager : MonoBehaviour
             //PLACING VERTICAL WALLS via Right-Click---------------------------------------------------
             if (Input.GetMouseButtonUp(1))
             {
-                if (Physics.Raycast(ray, out hit))
+                if (collisionFound)
                 {
                     GameObject tempObj;
-                    ray = Camera.main.ScreenPointToRay(Input.mousePosition);
                     if (hit.transform.tag == "Peg")
                     {
                         WallPeg tempPeg;
