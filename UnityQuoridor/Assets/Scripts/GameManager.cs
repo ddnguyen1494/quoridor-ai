@@ -159,6 +159,11 @@ public class GameManager : MonoBehaviour
             playerStatus[0].goalX = 0;
             playerStatus[0].goalY = -1;
             boardStatus[8, 4].isOpen = false;
+            if (MainMenu.playerSettings == 2) // If EvE was selected make 1st player a Bot
+            {
+                playerStatus[0].isAi = true;
+                MyAgent = new Assets.Scripts.Agent();
+            }
 
             playerStatus[1].transform.position = playerStatus[1].spawnPoint;
             playerStatus[1].x = 0;
@@ -166,7 +171,7 @@ public class GameManager : MonoBehaviour
             playerStatus[1].goalX = 8;
             playerStatus[1].goalY = -1;
             boardStatus[0, 4].isOpen = false;
-            if (MainMenu.playerSettings == 1) // If PvE was selected make 2nd player a Bot
+            if (MainMenu.playerSettings == 1 || MainMenu.playerSettings == 2) // If PvE or EvE was selected make 2nd player a Bot
             {
                 playerStatus[1].isAi = true;
                 MyAgent = new Assets.Scripts.Agent();
