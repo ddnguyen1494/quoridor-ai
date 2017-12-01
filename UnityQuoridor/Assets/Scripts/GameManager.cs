@@ -233,16 +233,16 @@ public class GameManager : MonoBehaviour
 
         while (!gameOver)
         {
-            Debug.Log("Player " + (turnOrder + 1) + "'s turn Begin.");
+//            Debug.Log("Player " + (turnOrder + 1) + "'s turn Begin.");
             if (!playerStatus[turnOrder].isAi)
                 yield return StartCoroutine(PlayersTurn(turnOrder)); // Human Players Turn
             else
                 yield return StartCoroutine(AITurn(turnOrder)); // AI Players Turn
-            Debug.Log("Player " + (turnOrder + 1) + "'s turn has ended.");
+//            Debug.Log("Player " + (turnOrder + 1) + "'s turn has ended.");
             // Check to see if player has won
             if (playerStatus[turnOrder].CheckWin())
             {
-                Debug.Log("Player " + (turnOrder + 1) + "wins.");
+//                Debug.Log("Player " + (turnOrder + 1) + "wins.");
                 gameOver = true;
                 GameOver(turnOrder + 1);
                 break;
@@ -259,7 +259,7 @@ public class GameManager : MonoBehaviour
         //move or choose wall
         playerStatus[playerNum].currentTurn = true;
         playersTurnText.text = "Player " + (playerNum + 1) + "'s Turn!";
-        Assets.Scripts.ActionFunction action = MyAgent.NextMove(MainBoard); // <- currently has an issue
+        Assets.Scripts.ActionFunction action = MyAgent.NextMove(MainBoard, playerNum); // <- currently has an issue
         if (action.function == null)
         {
             Debug.LogError("Agent action is null. Something is wrong. Agent just skip his move");
@@ -318,7 +318,7 @@ public class GameManager : MonoBehaviour
                 playersTurnText.text = "Player " + (p + 1) + " Passes!";
                 playerStatus[p].currentTurn = false;
                 yield return m_StartWait;
-                Debug.Log("Player " + (p + 1) + "Passes.");
+//                Debug.Log("Player " + (p + 1) + "Passes.");
             }
 
 			ray = Camera.main.ScreenPointToRay(Input.mousePosition);

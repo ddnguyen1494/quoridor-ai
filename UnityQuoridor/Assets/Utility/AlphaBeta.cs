@@ -26,6 +26,8 @@ namespace Assets.Scripts
             if (Agent.CutOff(depth))
             {
                 node.Value = Agent.Evaluate(node);
+				if (node.Value != 0)
+					UnityEngine.Debug.Log(node.ToString () + "at depth: " + depth + " has value = " + node.Value); 
                 return new ValueAndAction(node.Value, node.Move);
             }
             int tempVal = int.MinValue;
@@ -57,6 +59,8 @@ namespace Assets.Scripts
             if (Agent.CutOff(depth))
             {
                 node.Value = Agent.Evaluate(node);
+				if (node.Value != 0)
+					UnityEngine.Debug.Log(node.ToString () + " at depth= " + depth + " has value = " + node.Value); 
                 return new ValueAndAction(node.Value, node.Move);
             }
             int tempVal = int.MaxValue;

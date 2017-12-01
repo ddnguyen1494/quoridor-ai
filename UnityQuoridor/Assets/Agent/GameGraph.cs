@@ -10,10 +10,6 @@ namespace Assets.Scripts
         public int x;
         public int y;
 
-        /// <summary>
-        /// This struct stores the function that a player should make with 
-        /// the corresponding x and y
-        /// </summary>
         public ActionFunction(Board.Action fnc, int player, int x, int y)
         {
             this.function = fnc;
@@ -21,6 +17,12 @@ namespace Assets.Scripts
             this.x = x;
             this.y = y;
         }
+
+		public override string ToString ()
+		{
+			return string.Format("Move: {0}, X: {1}, Y: {2}", 
+				function.Method.Name, x, y);
+		}
     }
     internal class Node
     {
@@ -43,6 +45,11 @@ namespace Assets.Scripts
             Player = player;
             Children = new List<Node>();
         }
+
+		public override string ToString ()
+		{
+			return Move.ToString ();
+		}
     }
 
 }

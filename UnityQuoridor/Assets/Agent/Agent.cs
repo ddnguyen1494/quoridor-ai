@@ -17,12 +17,15 @@ namespace Assets.Scripts
         private int MAX_DEPTH = 12;
         static int current_depth = 0;
         static Board board;
+		static int player_num;
+
         //return Agent's decision
-        public ActionFunction NextMove(Board state)
+		public ActionFunction NextMove(Board state, int p)
         {
 			UnityEngine.Debug.Log("Start of ActionFunction in Agent Class!"); //delete once fnc is complete
             ActionFunction bestAction = new ActionFunction();
-            root = new Node(1);
+			player_num = p;
+            root = new Node(p);
             board = state; 
             Stopwatch sw = new Stopwatch();
             try
@@ -48,14 +51,15 @@ namespace Assets.Scripts
         public static int Evaluate(Node node)
         {
             PlayerInfo[] playerStatus = board.playerStatus;
-            int currentPlayer = node.Player;
-            int opponent_dist = AStarSearch.FindShortestPathLength(board, node, PLAYER1);
-            int my_dist = AStarSearch.FindShortestPathLength(board, node, PLAYER2);
+            int me = player_num;
+			int opponent = (player_num + 1) % 2;
+            int opponent_dist = AStarSearch.FindShortestPathLength(board, opponent);
+            int my_dist = AStarSearch.FindShortestPathLength(board, me);
             if (opponent_dist == 0)
                 return -50;
             if (my_dist == 0)
                 return +50;
-            int score = (int) (opponent_dist - my_dist + 1 *(playerStatus[PLAYER1].wallsLeft - playerStatus[PLAYER2].wallsLeft));
+            int score = (int) (opponent_dist - my_dist + 1 *(playerStatus[opponent].wallsLeft - playerStatus[me].wallsLeft));
             return score;
         }
 
