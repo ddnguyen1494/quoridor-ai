@@ -18,6 +18,7 @@ public class PlayerInfo : MonoBehaviour {
         id = other.id;
         currentTurn = other.currentTurn;
         isAi = other.isAi;
+		agent = null;
     }
 
 	public int x;
@@ -28,7 +29,7 @@ public class PlayerInfo : MonoBehaviour {
 	public int id;
 	public bool currentTurn = false;
 	public bool isAi = false; // new
-
+	public Assets.Scripts.MediumAgent agent; 
 	public bool CheckWin()
 	{
 		return (x == goalX || y == goalY);

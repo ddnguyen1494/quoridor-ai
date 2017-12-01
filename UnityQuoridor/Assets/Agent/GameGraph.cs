@@ -22,7 +22,7 @@ namespace Assets.Scripts
             this.y = y;
         }
     }
-    internal class Node
+	public class Node
     {
         public int Value { get; set; }
         public ActionFunction Move { get; set; }

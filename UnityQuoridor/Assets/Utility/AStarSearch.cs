@@ -49,7 +49,7 @@ namespace Assets.Utility
         {
             return node.PathCost + Math.Abs(node.Pos.X - GOAL);
         }
-        public static int FindShortestPathLength(Board board, Node node, int player)
+        public static int FindShortestPathLength(Board board, int player)
         {
             SimplePriorityQueue<QueueNode> open = new SimplePriorityQueue<QueueNode>();
 

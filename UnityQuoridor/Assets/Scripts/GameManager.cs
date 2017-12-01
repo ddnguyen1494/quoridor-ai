@@ -52,7 +52,6 @@ public class GameManager : MonoBehaviour
 
     Assets.Scripts.Board MainBoard;
 
-    private Assets.Scripts.Agent MyAgent;
     // Use this for initialization
     void Start()
     {
@@ -162,7 +161,7 @@ public class GameManager : MonoBehaviour
             if (MainMenu.playerSettings == 2) // If EvE was selected make 1st player a Bot
             {
                 playerStatus[0].isAi = true;
-                MyAgent = new Assets.Scripts.Agent();
+				playerStatus[0].agent = new Assets.Scripts.MediumAgent(1);
             }
 
             playerStatus[1].transform.position = playerStatus[1].spawnPoint;
@@ -174,7 +173,7 @@ public class GameManager : MonoBehaviour
             if (MainMenu.playerSettings == 1 || MainMenu.playerSettings == 2) // If PvE or EvE was selected make 2nd player a Bot
             {
                 playerStatus[1].isAi = true;
-                MyAgent = new Assets.Scripts.Agent();
+				playerStatus[1].agent = new Assets.Scripts.MediumAgent(1);
             }
         }
         // For 4 players set up start information this way
@@ -261,7 +260,7 @@ public class GameManager : MonoBehaviour
         //move or choose wall
         playerStatus[playerNum].currentTurn = true;
         playersTurnText.text = "Player " + (playerNum + 1) + "'s Turn!";
-        Assets.Scripts.ActionFunction action = MyAgent.NextMove(MainBoard); // <- currently has an issue
+        Assets.Scripts.ActionFunction action = playerStatus[playerNum].agent.NextMove(MainBoard, playerNum); // <- currently has an issue
         if (action.function == null)
         {
             Debug.LogError("Agent action is null. Something is wrong. Agent just skip his move");
