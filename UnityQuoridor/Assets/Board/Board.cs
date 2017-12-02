@@ -105,13 +105,18 @@ namespace Assets.Scripts
 				PlaceHorizontalWall(this, -1, xPos, yPos);
 
                 //if still winnable place the wall, else revert back to no wall
-                if (CheckWinnable(0) && CheckWinnable(1))
+                if (_numPlayers == 2 && CheckWinnable(0) && CheckWinnable(1))
                 {
                     //PlaceWallH(xPos, yPos);
 //                    wallPegStatus[xPos, yPos].isOpen = true; //dont need?
 //                    boardStatus[xPos, yPos].hasBotWall = false;
 //                    boardStatus[xPos, yPos + 1].hasBotWall = false;
 					retVal = true;
+                }
+                else if (_numPlayers == 4 && CheckWinnable(0) && CheckWinnable(1) &&
+                    CheckWinnable(2) && CheckWinnable(3))
+                {
+                    retVal =  true;
                 }
                 else
                 {
@@ -185,13 +190,18 @@ namespace Assets.Scripts
 				Board.PlaceVerticalWall(this, -1, xPos, yPos);
 				bool retVal;
                 //if still winnable place the wall, else revert back to no wall
-                if (CheckWinnable(0) && CheckWinnable(1))
+                if (_numPlayers == 2 && CheckWinnable(0) && CheckWinnable(1))
                 {
                     //PlaceWallV(xPos, yPos);
-//                    wallPegStatus[xPos, yPos].isOpen = true; //dont need?
-//                    boardStatus[xPos, yPos].hasRightWall = false;
-//                    boardStatus[xPos + 1, yPos].hasRightWall = false;
-                     retVal = true;
+                    //                    wallPegStatus[xPos, yPos].isOpen = true; //dont need?
+                    //                    boardStatus[xPos, yPos].hasRightWall = false;
+                    //                    boardStatus[xPos + 1, yPos].hasRightWall = false;
+                    retVal = true;
+                }
+                else if (_numPlayers == 4 && CheckWinnable(0) && CheckWinnable(1) &&
+                    CheckWinnable(2) && CheckWinnable(3))
+                {
+                    retVal = true;
                 }
                 else
                 {

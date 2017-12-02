@@ -54,14 +54,19 @@ namespace Assets.Utility
             SimplePriorityQueue<QueueNode> open = new SimplePriorityQueue<QueueNode>();
 
             bool[,] visited = new bool[Board.BOARD_SIZE, Board.BOARD_SIZE];
-            GOAL = board.playerStatus[player].goalX;
+            int GOAL;
+            if (player > 1) //4 players
+                GOAL = board.playerStatus[player].goalY;
+            else
+                GOAL = board.playerStatus[player].goalX;
             QueueNode root = new QueueNode(board.playerStatus[player].x, board.playerStatus[player].y, 0);
             open.Enqueue(root, F(root));
 
             while (open.Count != 0)
             {
                 QueueNode current = open.Dequeue();
-                if (current.Pos.X == GOAL)
+                if ((player > 1 && current.Pos.Y == GOAL) ||
+                    (player <= 1 && current.Pos.X == GOAL))
                     return current.PathCost;
                 int x = current.Pos.X;
                 int y = current.Pos.Y;

@@ -60,6 +60,7 @@ namespace Assets.Scripts
             if (my_dist == 0)
                 return +50;
             int score = (int) (opponent_dist - my_dist + 1 *(playerStatus[opponent].wallsLeft - playerStatus[me].wallsLeft));
+
             return score;
         }
 
