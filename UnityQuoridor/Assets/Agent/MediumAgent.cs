@@ -50,13 +50,13 @@ namespace Assets.Scripts
             PlayerInfo[] playerStatus = board.playerStatus;
             int me = player_num;
 			int opponent = (player_num + 1) % 2;
-            int opponent_dist = AStarSearch.FindShortestPathLength(board, opponent);
+			int opponent_dist = AStarSearch.FindShortestPathLength(board, opponent);
             int my_dist = AStarSearch.FindShortestPathLength(board, me);
             if (opponent_dist == 0)
 				return - 50;
             if (my_dist == 0)
                 return +50;
-			int score = (int) 1 * (opponent_dist - my_dist) + 1 *(playerStatus[opponent].wallsLeft - playerStatus[me].wallsLeft);
+			int score = (int) 1 * (opponent_dist - my_dist) + 1 *(playerStatus[me].wallsLeft - playerStatus[opponent].wallsLeft);
             return score;
         }
 

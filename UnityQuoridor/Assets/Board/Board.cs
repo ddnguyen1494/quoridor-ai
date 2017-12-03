@@ -91,6 +91,8 @@ namespace Assets.Scripts
         #region Logic for checking if a move is legal
         public bool CheckWallH(int xPos, int yPos)
         {
+			if (xPos < 0 || xPos > 7 || yPos < 0 || yPos > 7)
+				return false;
             if (!boardStatus[xPos, yPos].hasBotWall &&
                 !boardStatus[xPos, yPos + 1].hasBotWall &&
                  wallPegStatus[xPos, yPos].isOpen)
@@ -168,6 +170,8 @@ namespace Assets.Scripts
 
         public bool CheckWallV(int xPos, int yPos)
         {
+			if (xPos < 0 || xPos > 7 || yPos < 0 || yPos > 7)
+				return false;
             if (!boardStatus[xPos, yPos].hasRightWall &&
                 !boardStatus[xPos + 1, yPos].hasRightWall &&
                 wallPegStatus[xPos, yPos].isOpen)
