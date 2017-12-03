@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections;
-
+using Assets.Utility;
 namespace Assets.Scripts
 {
     public struct ActionFunction
@@ -29,20 +29,21 @@ namespace Assets.Scripts
         public ActionFunction Undo { get; set; }
         public int Player { get; set; }
         public List<Node> Children { get; set; }
+        public int AgentSP { get; set; }
+        public int OpponentSP { get; set; }
 
-        public Node(ActionFunction move, ActionFunction undoMove, int player)
+        public Node(ActionFunction move, ActionFunction undoMove, int player) : this(player)
         {
             Move = move;
             Undo = undoMove;
-            Player = player;
-            Children = new List<Node>();
         }
 
         public Node(int player)
         {
             Player = player;
             Children = new List<Node>();
+            AgentSP = int.MinValue;
+            OpponentSP = int.MinValue;
         }
     }
-
 }

@@ -26,14 +26,16 @@ namespace Assets.Scripts
             {
                 node.Value = agent.Evaluate(node);
 				if (node.Value != 0)
-					UnityEngine.Debug.Log(node.ToString () + "at depth: " + depth + " has value = " + node.Value); 
                 return new ValueAndAction(node.Value, node.Move);
             }
             int tempVal = int.MinValue;
             ActionFunction tempAction = new ActionFunction();
-            agent.GenerateSuccessors(node);
+            if (node.Children.Count == 0)
+                agent.GenerateSuccessors(node);
 			foreach (Node child in node.Children)
             {
+                //if (agent.IsTimeUp())
+                //    break;
                 agent.board.ExecuteFunction(child.Move);
                 var retValAction = MinValue(agent, child, ref alpha, ref beta, depth + 1);
                 agent.board.ExecuteFunction(child.Undo);
@@ -59,14 +61,16 @@ namespace Assets.Scripts
             {
                 node.Value = agent.Evaluate(node);
 				if (node.Value != 0)
-					UnityEngine.Debug.Log(node.ToString () + " at depth= " + depth + " has value = " + node.Value); 
                 return new ValueAndAction(node.Value, node.Move);
             }
             int tempVal = int.MaxValue;
             ActionFunction tempAction = new ActionFunction();
-            agent.GenerateSuccessors(node);
+            if (node.Children.Count == 0)
+                agent.GenerateSuccessors(node);
             foreach (Node child in node.Children)
             {
+                //if (agent.IsTimeUp())
+                //    break;
                 agent.board.ExecuteFunction(child.Move);
                 var retValAction = MaxValue(agent, child, ref alpha, ref beta, depth + 1);
                 agent.board.ExecuteFunction(child.Undo);

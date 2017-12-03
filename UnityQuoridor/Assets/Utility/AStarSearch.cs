@@ -114,6 +114,7 @@ namespace Assets.Utility
 						path.Add (current.Pos);
 						current = current.Parent;
 					}
+                    path.Reverse();
 					return path;
 				}
 				int x = current.Pos.X;

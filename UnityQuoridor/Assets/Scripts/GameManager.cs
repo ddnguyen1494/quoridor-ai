@@ -173,7 +173,7 @@ public class GameManager : MonoBehaviour
             if (MainMenu.playerSettings == 1 || MainMenu.playerSettings == 2) // If PvE or EvE was selected make 2nd player a Bot
             {
                 playerStatus[1].isAi = true;
-				playerStatus[1].agent = new Assets.Scripts.MediumAgent(1);
+                playerStatus[1].agent = new HardAgent(3);
             }
         }
         // For 4 players set up start information this way

@@ -11,10 +11,13 @@ namespace Assets.Scripts
 {
     public class MediumAgent : Agent
     {
+        Stopwatch sw = new Stopwatch();
+        public MediumAgent()
+            { }
 		public MediumAgent(int depth) : base(depth)
 		{
-			
-		}
+            sw = new Stopwatch();
+        }
         //return Agent's decision
 		public override ActionFunction NextMove(Board state, int p)
         {
@@ -24,23 +27,20 @@ namespace Assets.Scripts
 			root = new Node(p);
 			board = state; 
 			current_depth = 0;
-            Stopwatch sw = new Stopwatch();
             try
             {
 				sw.Start();
                 do
                 {
 					current_depth++;
-                    
 					bestAction = AlphaBeta.Search(this);
-				} while (false && sw.ElapsedMilliseconds / 1000 < 10 && current_depth < MAX_DEPTH); // 10 seconds to think
-				sw.Stop();
+				} while (false && !IsTimeUp() && current_depth < MAX_DEPTH); // 5 seconds to think
                 sw.Reset();
                 current_depth = 0;
             }
             catch(Exception ex)
             {
-                Console.WriteLine(ex.ToString());
+                UnityEngine.Debug.LogException(ex);
             }
             return bestAction;
         }
@@ -56,7 +56,7 @@ namespace Assets.Scripts
 				return - 50;
             if (my_dist == 0)
                 return +50;
-			int score = (int) 1 * (opponent_dist - my_dist) + 1 *(playerStatus[me].wallsLeft - playerStatus[opponent].wallsLeft);
+			int score = (int) 1 * (opponent_dist - my_dist) + 1 *(playerStatus[opponent].wallsLeft - playerStatus[me].wallsLeft);
             return score;
         }
 
@@ -64,7 +64,8 @@ namespace Assets.Scripts
         {
             if (board.playerStatus[PLAYER1].CheckWin() ||
                 board.playerStatus[PLAYER2].CheckWin() ||
-				depth == MAX_DEPTH)
+				depth == MAX_DEPTH ||
+                IsTimeUp()) //Start wrapping up
                 return true;
             return false;
         }
@@ -74,6 +75,36 @@ namespace Assets.Scripts
             //Player 1 prioritizes moving up -> left or right -> Wall -> Down (tentative Move Ordering)
             PlayerInfo[] playerStatus = board.playerStatus;
             int p = node.Player;
+            GeneratePossibleMoves(p, ref node);
+            #region Wall Generation (for both players) taking too long
+            if (playerStatus[p].wallsLeft == 0) // player has no wall left
+                return;
+            ActionFunction undoWall;
+            for (int x = 0; x < Board.BOARD_SIZE - 1; x++)
+            {
+				for (int y = 0; y < Board.BOARD_SIZE - 1; y++)
+                {
+                    //Horizontal Wall
+                    if (board.CheckWallH(x, y))
+                    {
+                        undoWall = new ActionFunction(Board.UndoPlaceHorizontalWall, p, x, y);
+                        node.Children.Add(new Node(new ActionFunction(Board.PlaceHorizontalWall, p, x, y), undoWall, (p + 1) % 2));
+                    }
+                    //Vertical Wall
+                    if (board.CheckWallV(x, y))
+                    {
+                        undoWall = new ActionFunction(Board.UndoPlaceVerticalWall, p, x, y);
+                        node.Children.Add(new Node(new ActionFunction(Board.PlaceVerticalWall, p, x, y), undoWall, (p + 1) % 2));
+                    }
+
+                }
+            }
+            #endregion
+        }
+
+        protected void GeneratePossibleMoves(int p, ref Node node)
+        {
+            PlayerInfo[] playerStatus = board.playerStatus;
             int nextPlayer = (p + 1) % 2;
             ActionFunction undo = new ActionFunction(Board.UndoMovePawn, p, playerStatus[p].x, playerStatus[p].y);
             #region Player 1's Successors
@@ -230,31 +261,11 @@ namespace Assets.Scripts
                 }
             }
             #endregion
+        }
 
-            #region Wall Generation (for both players) taking too long
-            if (playerStatus[p].wallsLeft == 0) // player has no wall left
-                return;
-            ActionFunction undoWall;
-            for (int x = 0; x < Board.BOARD_SIZE - 1; x++)
-            {
-				for (int y = 0; y < Board.BOARD_SIZE - 1; y++)
-                {
-                    //Horizontal Wall
-                    if (board.CheckWallH(x, y))
-                    {
-                        undoWall = new ActionFunction(Board.UndoPlaceHorizontalWall, p, x, y);
-                        node.Children.Add(new Node(new ActionFunction(Board.PlaceHorizontalWall, p, x, y), undoWall, nextPlayer));
-                    }
-                    //Vertical Wall
-                    if (board.CheckWallV(x, y))
-                    {
-                        undoWall = new ActionFunction(Board.UndoPlaceVerticalWall, p, x, y);
-                        node.Children.Add(new Node(new ActionFunction(Board.PlaceVerticalWall, p, x, y), undoWall, nextPlayer));
-                    }
-
-                }
-            }
-            #endregion
+        public override bool IsTimeUp()
+        {
+            return sw.Elapsed.TotalSeconds >=5;
         }
     }
 }
