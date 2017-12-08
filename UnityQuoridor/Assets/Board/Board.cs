@@ -53,41 +53,6 @@ namespace Assets.Scripts
                 }
             }
         }
-        public void GetAccessible(int x, int y, int num, int direction)
-        {
-            if (accessible[x, y] > num)
-            {
-                accessible[x, y] = num;
-                if (direction != 1 && x != 8 && CanMoveDown(x, y))
-                {
-                    GetAccessible(x + 1, y, num + 1, 3);
-                }
-                if (direction != 2 && y != 8 && CanMoveRight(x, y))
-                {
-                    GetAccessible(x, y + 1, num + 1, 0);
-                }
-                if (direction != 3 && x != 0 && CanMoveUp(x, y))
-                {
-                    GetAccessible(x - 1, y, num + 1, 1);
-                }
-                if (direction != 0 && y != 0 && CanMoveLeft(x, y))
-                {
-                    GetAccessible(x, y - 1, num + 1, 2);
-                }
-            }
-        }
-
-        public void GetAccessible(int x, int y)
-        {
-            for (int i = 0; i < BOARD_SIZE; i++)
-            {
-                for (int j = 0; j < BOARD_SIZE; j++)
-                {
-                    accessible[i, j] = 1000;
-                }
-            }
-            GetAccessible(x, y, 0, -1);
-        }
 
         #region Logic for checking if a move is legal
         public bool CheckWallH(int xPos, int yPos)
