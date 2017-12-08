@@ -14,7 +14,7 @@ namespace Assets.Scripts
         const int PLAYER1 = 0;
         const int PLAYER2 = 1;
         Node root;
-        private int MAX_DEPTH = 12;
+		private static int MAX_DEPTH = 1;
         static int current_depth = 0;
         static Board board;
 		static int player_num;
@@ -34,7 +34,7 @@ namespace Assets.Scripts
                 {
                     current_depth++;
                     bestAction = AlphaBeta.Search(board, root);
-				} while (w.ElapsedMilliseconds / 1000 < 5 && current_depth < MAX_DEPTH); 
+				} while (sw.ElapsedMilliseconds / 1000 < 5 && current_depth < MAX_DEPTH); 
 				sw.Stop();
                 sw.Reset();
                 current_depth = 0;
@@ -66,6 +66,7 @@ namespace Assets.Scripts
         {
             if (board.playerStatus[PLAYER1].CheckWin() ||
                 board.playerStatus[PLAYER2].CheckWin() ||
+                depth == MAX_DEPTH ||
                 depth == current_depth)
                 return true;
             return false;
