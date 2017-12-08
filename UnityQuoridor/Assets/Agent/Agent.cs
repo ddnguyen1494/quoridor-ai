@@ -22,7 +22,6 @@ namespace Assets.Scripts
         //return Agent's decision
 		public ActionFunction NextMove(Board state, int p)
         {
-			UnityEngine.Debug.Log("Start of ActionFunction in Agent Class!"); //delete once fnc is complete
             ActionFunction bestAction = new ActionFunction();
 			player_num = p;
             root = new Node(p);
@@ -34,9 +33,8 @@ namespace Assets.Scripts
                 do
                 {
                     current_depth++;
-                    
                     bestAction = AlphaBeta.Search(board, root);
-				} while (false && sw.ElapsedMilliseconds / 1000 < 10 && current_depth < MAX_DEPTH); // 10 seconds to think
+				} while (w.ElapsedMilliseconds / 1000 < 5 && current_depth < MAX_DEPTH); 
 				sw.Stop();
                 sw.Reset();
                 current_depth = 0;
@@ -59,7 +57,7 @@ namespace Assets.Scripts
                 return -50;
             if (my_dist == 0)
                 return +50;
-            int score = (int) (opponent_dist - my_dist + 1 *(playerStatus[opponent].wallsLeft - playerStatus[me].wallsLeft));
+            int score = opponent_dist - my_dist + (playerStatus[opponent].wallsLeft - playerStatus[me].wallsLeft);
 
             return score;
         }
@@ -68,7 +66,7 @@ namespace Assets.Scripts
         {
             if (board.playerStatus[PLAYER1].CheckWin() ||
                 board.playerStatus[PLAYER2].CheckWin() ||
-                depth == 1)
+                depth == current_depth)
                 return true;
             return false;
         }
